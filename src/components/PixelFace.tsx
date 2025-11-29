@@ -121,10 +121,10 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               fill="hsl(var(--primary))"
               filter="url(#glow)"
               animate={{
-                y: [-1, 1, -1],
+                y: [0, -0.5, 0, 0.5, 0],
               }}
               transition={{
-                duration: 2.5,
+                duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut"
               }}
@@ -134,13 +134,13 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               fill="hsl(var(--primary))"
               filter="url(#glow)"
               animate={{
-                y: [-1, 1, -1],
+                y: [0, 0.5, 0, -0.5, 0],
               }}
               transition={{
-                duration: 2.5,
+                duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: 0.3
+                delay: 0.4
               }}
             />
           </>
