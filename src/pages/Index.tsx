@@ -1,22 +1,30 @@
-import { useState, useEffect } from 'react';
-import { VoiceProvider, useVoice } from '@/contexts/VoiceContext';
-import { useAuth } from '@/contexts/AuthContext';
-import { CRTOverlay } from '@/components/CRTOverlay';
-import { OrientationLock } from '@/components/OrientationLock';
-import { PixelFace } from '@/components/PixelFace';
-import { DebugTerminal } from '@/components/DebugTerminal';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { User, Minimize2, Maximize2, Mic, MicOff, Power, PowerOff } from 'lucide-react';
-import { useLiveKit } from '@/hooks/useLiveKit';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { VoiceProvider, useVoice } from "@/contexts/VoiceContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { CRTOverlay } from "@/components/CRTOverlay";
+import { OrientationLock } from "@/components/OrientationLock";
+import { PixelFace } from "@/components/PixelFace";
+import { DebugTerminal } from "@/components/DebugTerminal";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import {
+  User,
+  Minimize2,
+  Maximize2,
+  Mic,
+  MicOff,
+  Power,
+  PowerOff,
+} from "lucide-react";
+import { useLiveKit } from "@/hooks/useLiveKit";
+import { toast } from "sonner";
 
 const VoiceAgentContent = () => {
   const { emotion, updateEmotionFromLiveKit, setIsConnected } = useVoice();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [focusMode, setFocusMode] = useState(false);
-  
+
   const {
     isConnected,
     isConnecting,
@@ -41,56 +49,60 @@ const VoiceAgentContent = () => {
 
   const handleConnect = async () => {
     try {
-      const roomName = `rummi-${user?.id || 'guest'}`;
-      const participantName = user?.email || 'Guest';
+      const roomName = `rummi-${user?.id || "guest"}`;
+      const participantName = user?.email || "Guest";
       await connect(roomName, participantName);
-      toast.success('Connected to RUMMI');
+      toast.success("Connected to RUMMI");
     } catch (err) {
-      toast.error('Failed to connect');
+      toast.error("Failed to connect");
     }
   };
 
   const handleDisconnect = async () => {
     await disconnect();
-    toast.info('Disconnected from RUMMI');
+    toast.info("Disconnected from RUMMI");
   };
-  
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
       <CRTOverlay />
       <OrientationLock />
-      
+
       {/* Top Navigation - Hidden in focus mode */}
       {!focusMode && (
         <div className="absolute top-6 right-6 z-20 flex gap-3 animate-fade-in">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="icon"
-            onClick={() => navigate('/profile')}
+            onClick={() => navigate("/profile")}
             className="font-retro"
           >
             <User className="h-4 w-4" />
           </Button>
-          <Button 
-            variant="outline" 
-            onClick={signOut}
-            className="font-retro"
-          >
+          <Button variant="outline" onClick={signOut} className="font-retro">
             Sign Out
           </Button>
         </div>
       )}
 
       {/* Focus Mode Toggle */}
-      <div className={`absolute ${focusMode ? 'top-6 right-6' : 'top-6 left-6'} z-20 animate-fade-in`}>
-        <Button 
-          variant="outline" 
+      <div
+        className={`absolute ${
+          focusMode ? "top-6 right-6" : "top-6 left-6"
+        } z-20 animate-fade-in`}
+      >
+        <Button
+          variant="outline"
           size="icon"
           onClick={() => setFocusMode(!focusMode)}
           className="font-retro"
           title={focusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
         >
-          {focusMode ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+          {focusMode ? (
+            <Maximize2 className="h-4 w-4" />
+          ) : (
+            <Minimize2 className="h-4 w-4" />
+          )}
         </Button>
       </div>
 
@@ -112,7 +124,7 @@ const VoiceAgentContent = () => {
               ) : (
                 <>
                   <Power className="h-4 w-4 mr-2" />
-                  Connect to RUMMI
+                  Connect to Rumi
                 </>
               )}
             </Button>
@@ -125,7 +137,11 @@ const VoiceAgentContent = () => {
                 className="font-retro"
                 title={isMuted ? "Unmute microphone" : "Mute microphone"}
               >
-                {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                {isMuted ? (
+                  <MicOff className="h-4 w-4" />
+                ) : (
+                  <Mic className="h-4 w-4" />
+                )}
               </Button>
               <Button
                 variant="outline"
@@ -144,10 +160,10 @@ const VoiceAgentContent = () => {
         {/* Title and Welcome - Hidden in focus mode */}
         {!focusMode && (
           <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-6xl font-retro text-primary retro-glow mb-2">RUMMI</h1>
-            <div className="text-2xl font-retro text-primary opacity-60">
-              Your personal coach
-            </div>
+            <h1 className="text-6xl font-retro text-primary retro-glow mb-2">
+              Rumi
+            </h1>
+
             {user && (
               <div className="text-sm font-retro text-primary opacity-40 mt-2">
                 Welcome, {user.email}
@@ -166,7 +182,7 @@ const VoiceAgentContent = () => {
             </div>
             {isConnected && (
               <div className="text-sm font-retro text-primary opacity-60 mt-2">
-                {isMuted ? '🔇 Muted' : '🎤 Listening'}
+                {isMuted ? "🔇 Muted" : "🎤 Listening"}
               </div>
             )}
           </div>
@@ -179,8 +195,10 @@ const VoiceAgentContent = () => {
   );
 };
 const Index = () => {
-  return <VoiceProvider>
+  return (
+    <VoiceProvider>
       <VoiceAgentContent />
-    </VoiceProvider>;
+    </VoiceProvider>
+  );
 };
 export default Index;
