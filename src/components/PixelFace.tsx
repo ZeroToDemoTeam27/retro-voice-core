@@ -183,24 +183,6 @@ export const PixelFace = ({
       <svg width="300" height="300" viewBox="0 0 300 300" style={{
       filter: 'drop-shadow(0 0 15px rgba(255, 176, 0, 0.4))'
     }} className="retro-glow border-none">
-        {/* Face outline with flowing animation */}
-        <motion.circle
-          cx="150"
-          cy="150"
-          r="120"
-          stroke="hsl(var(--primary))"
-          strokeWidth="3"
-          fill="none"
-          animate={{
-            scale: [1, 1.02, 1],
-            rotate: [0, 2, 0, -2, 0]
-          }}
-          transition={{
-            duration: 4,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
         <motion.g animate={emotion === 'ENGAGED' ? {
         y: [-3, 3, -3]
       } : {}} transition={{
