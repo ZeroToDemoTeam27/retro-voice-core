@@ -1,0 +1,15 @@
+[project]
+name = "rummi-agent"
+version = "0.1.0"
+description = "RUMMI voice assistant agent using LiveKit and Gemini Live API"
+requires-python = ">=3.9"
+dependencies = [
+    "livekit-agents[google]~=1.2",
+    "livekit-plugins-noise-cancellation~=0.2",
+    "python-dotenv",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VoiceProvider, useVoice } from '@/contexts/VoiceContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { CRTOverlay } from '@/components/CRTOverlay';
@@ -7,13 +7,53 @@ import { PixelFace } from '@/components/PixelFace';
 import { DebugTerminal } from '@/components/DebugTerminal';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { User, Minimize2, Maximize2 } from 'lucide-react';
+import { User, Minimize2, Maximize2, Mic, MicOff, Power, PowerOff } from 'lucide-react';
+import { useLiveKit } from '@/hooks/useLiveKit';
+import { toast } from 'sonner';
 
 const VoiceAgentContent = () => {
-  const { emotion } = useVoice();
+  const { emotion, updateEmotionFromLiveKit, setIsConnected } = useVoice();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [focusMode, setFocusMode] = useState(false);
+  
+  const {
+    isConnected,
+    isConnecting,
+    error,
+    connect,
+    disconnect,
+    toggleMute,
+    isMuted,
+  } = useLiveKit(updateEmotionFromLiveKit);
+
+  // Sync LiveKit connection state with VoiceContext
+  useEffect(() => {
+    setIsConnected(isConnected);
+  }, [isConnected, setIsConnected]);
+
+  // Show error toast if connection fails
+  useEffect(() => {
+    if (error) {
+      toast.error(`Connection error: ${error}`);
+    }
+  }, [error]);
+
+  const handleConnect = async () => {
+    try {
+      const roomName = `rummi-${user?.id || 'guest'}`;
+      const participantName = user?.email || 'Guest';
+      await connect(roomName, participantName);
+      toast.success('Connected to RUMMI');
+    } catch (err) {
+      toast.error('Failed to connect');
+    }
+  };
+
+  const handleDisconnect = async () => {
+    await disconnect();
+    toast.info('Disconnected from RUMMI');
+  };
   
   return (
     <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
@@ -54,6 +94,52 @@ const VoiceAgentContent = () => {
         </Button>
       </div>
 
+      {/* LiveKit Connection Controls - Hidden in focus mode */}
+      {!focusMode && (
+        <div className="absolute bottom-4 left-4 z-20 flex gap-2 animate-fade-in">
+          {!isConnected ? (
+            <Button
+              variant="outline"
+              onClick={handleConnect}
+              disabled={isConnecting}
+              className="font-retro"
+            >
+              {isConnecting ? (
+                <>
+                  <Power className="h-4 w-4 mr-2 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Power className="h-4 w-4 mr-2" />
+                  Connect to RUMMI
+                </>
+              )}
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleMute}
+                className="font-retro"
+                title={isMuted ? "Unmute microphone" : "Mute microphone"}
+              >
+                {isMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleDisconnect}
+                className="font-retro"
+              >
+                <PowerOff className="h-4 w-4 mr-2" />
+                Disconnect
+              </Button>
+            </>
+          )}
+        </div>
+      )}
+
       <div className="flex flex-col items-center justify-center gap-8 z-10">
         {/* Title and Welcome - Hidden in focus mode */}
         {!focusMode && (
@@ -78,6 +164,11 @@ const VoiceAgentContent = () => {
             <div className="text-xl font-retro text-primary">
               STATUS: {emotion}
             </div>
+            {isConnected && (
+              <div className="text-sm font-retro text-primary opacity-60 mt-2">
+                {isMuted ? '🔇 Muted' : '🎤 Listening'}
+              </div>
+            )}
           </div>
         )}
       </div>
