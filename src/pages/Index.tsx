@@ -62,7 +62,7 @@ const VoiceAgentContent = () => {
       
       {/* Top Navigation - Hidden in focus mode */}
       {!focusMode && (
-        <div className="absolute top-4 right-4 z-20 flex gap-2 animate-fade-in">
+        <div className="absolute top-6 right-6 z-20 flex gap-3 animate-fade-in">
           <Button 
             variant="outline" 
             size="icon"
@@ -82,7 +82,7 @@ const VoiceAgentContent = () => {
       )}
 
       {/* Focus Mode Toggle */}
-      <div className={`absolute ${focusMode ? 'top-4 right-4' : 'top-4 left-4'} z-20 animate-fade-in`}>
+      <div className={`absolute ${focusMode ? 'top-6 right-6' : 'top-6 left-6'} z-20 animate-fade-in`}>
         <Button 
           variant="outline" 
           size="icon"
@@ -96,7 +96,7 @@ const VoiceAgentContent = () => {
 
       {/* LiveKit Connection Controls - Hidden in focus mode */}
       {!focusMode && (
-        <div className="absolute bottom-4 left-4 z-20 flex gap-2 animate-fade-in">
+        <div className="absolute bottom-6 left-6 z-20 flex flex-wrap gap-3 max-w-md animate-fade-in">
           {!isConnected ? (
             <Button
               variant="outline"
