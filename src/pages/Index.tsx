@@ -12,7 +12,7 @@ import { useLiveKit } from '@/hooks/useLiveKit';
 import { toast } from 'sonner';
 
 const VoiceAgentContent = () => {
-  const { emotion, updateEmotionFromLiveKit, setIsConnected } = useVoice();
+  const { emotion, setEmotion, updateEmotionFromLiveKit, setIsConnected } = useVoice();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [focusMode, setFocusMode] = useState(false);
@@ -77,6 +77,20 @@ const VoiceAgentContent = () => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  // Endless emotion cycling loop
+  useEffect(() => {
+    const emotions: Array<'NEUTRAL' | 'HAPPY' | 'SAD' | 'CONFUSED' | 'INTERESTED' | 'LISTENING' | 'TALKING'> = 
+      ['NEUTRAL', 'HAPPY', 'SAD', 'CONFUSED', 'INTERESTED', 'LISTENING', 'TALKING'];
+    let currentIndex = 0;
+
+    const interval = setInterval(() => {
+      currentIndex = (currentIndex + 1) % emotions.length;
+      setEmotion(emotions[currentIndex]);
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, [setEmotion]);
   
   return (
     <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
