@@ -6,8 +6,8 @@ export type EmotionState =
   | 'SAD' 
   | 'CONFUSED' 
   | 'INTERESTED' 
-  | 'ENGAGED' 
-  | 'LISTENING';
+  | 'LISTENING' 
+  | 'TALKING';
 
 interface VoiceContextType {
   emotion: EmotionState;

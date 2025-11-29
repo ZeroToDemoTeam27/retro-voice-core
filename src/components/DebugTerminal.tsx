@@ -12,8 +12,8 @@ export const DebugTerminal = () => {
     'SAD',
     'CONFUSED',
     'INTERESTED',
-    'ENGAGED',
-    'LISTENING'
+    'LISTENING',
+    'TALKING'
   ];
 
   const runDemoLoop = async () => {
@@ -21,8 +21,8 @@ export const DebugTerminal = () => {
     setIsRunningDemo(true);
 
     const sequence: Array<{ state: EmotionState; duration: number }> = [
-      { state: 'LISTENING', duration: 3000 },
-      { state: 'ENGAGED', duration: 2000 },
+      { state: 'TALKING', duration: 3000 },
+      { state: 'LISTENING', duration: 2000 },
       { state: 'HAPPY', duration: 3000 },
       { state: 'NEUTRAL', duration: 1000 },
     ];
