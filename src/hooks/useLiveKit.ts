@@ -29,7 +29,6 @@ export const useLiveKit = (
   const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const roomRef = useRef<Room | null>(null);
-  const audioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   const connect = useCallback(
     async (
@@ -72,24 +71,10 @@ export const useLiveKit = (
         });
 
         // Set up event listeners before connecting
-        setupRoomListeners(newRoom, onEmotionUpdate, audioElementsRef);
+        setupRoomListeners(newRoom, onEmotionUpdate);
 
         // Connect to room
         await newRoom.connect(livekitUrl, token);
-
-        // Handle existing audio tracks from already-connected participants (e.g., agent)
-        newRoom.remoteParticipants.forEach((participant) => {
-          participant.audioTrackPublications.forEach((publication) => {
-            if (publication.track && publication.isSubscribed) {
-              handleAudioTrackSubscribed(
-                publication.track,
-                publication,
-                participant,
-                audioElementsRef
-              );
-            }
-          });
-        });
 
         // Request microphone permission and enable audio
         try {
@@ -123,16 +108,6 @@ export const useLiveKit = (
 
   const disconnect = useCallback(async () => {
     if (roomRef.current) {
-      // Clean up all audio elements
-      audioElementsRef.current.forEach((audioElement) => {
-        audioElement.pause();
-        audioElement.srcObject = null;
-        if (audioElement.parentNode) {
-          audioElement.parentNode.removeChild(audioElement);
-        }
-      });
-      audioElementsRef.current.clear();
-
       roomRef.current.disconnect();
       roomRef.current = null;
       setRoom(null);
@@ -159,16 +134,6 @@ export const useLiveKit = (
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      // Clean up all audio elements
-      audioElementsRef.current.forEach((audioElement) => {
-        audioElement.pause();
-        audioElement.srcObject = null;
-        if (audioElement.parentNode) {
-          audioElement.parentNode.removeChild(audioElement);
-        }
-      });
-      audioElementsRef.current.clear();
-
       if (roomRef.current) {
         roomRef.current.disconnect();
       }
@@ -187,67 +152,9 @@ export const useLiveKit = (
   };
 };
 
-function handleAudioTrackSubscribed(
-  track: Track,
-  publication: TrackPublication | undefined,
-  participant: RemoteParticipant,
-  audioElementsRef: React.MutableRefObject<Map<string, HTMLAudioElement>>
-) {
-  if (track.kind === "audio" && !participant.isLocal) {
-    console.log("Agent audio track subscribed:", track.sid);
-
-    const trackId = track.sid || `${participant.identity}-audio`;
-    
-    // Check if we already have an audio element for this track
-    let audioElement = audioElementsRef.current.get(trackId);
-
-    if (!audioElement) {
-      // Create new audio element
-      audioElement = track.attach() as HTMLAudioElement;
-      audioElement.autoplay = true;
-      audioElement.volume = 1.0;
-      audioElement.setAttribute("playsinline", "true");
-      audioElement.setAttribute("data-participant", participant.identity);
-      audioElement.setAttribute("data-track-id", trackId);
-      
-      // Add to DOM (hidden) to ensure it plays in all browsers
-      audioElement.style.display = "none";
-      audioElement.style.position = "absolute";
-      audioElement.style.left = "-9999px";
-      document.body.appendChild(audioElement);
-
-      audioElementsRef.current.set(trackId, audioElement);
-
-      // Play audio with error handling
-      const playPromise = audioElement.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            console.log("Agent audio playback started:", trackId);
-          })
-          .catch((err) => {
-            console.error("Failed to play agent audio:", err);
-            // Some browsers require user interaction before autoplay
-            // The audio will play when user interacts with the page
-          });
-      }
-    } else {
-      // Reattach if track changed
-      const mediaStream = track.mediaStream;
-      if (mediaStream && audioElement.srcObject !== mediaStream) {
-        audioElement.srcObject = mediaStream;
-        audioElement.play().catch((err) => {
-          console.error("Failed to replay audio:", err);
-        });
-      }
-    }
-  }
-}
-
 function setupRoomListeners(
   room: Room,
-  onEmotionUpdate?: (emotion: EmotionState) => void,
-  audioElementsRef?: React.MutableRefObject<Map<string, HTMLAudioElement>>
+  onEmotionUpdate?: (emotion: EmotionState) => void
 ) {
   // Handle connection state changes
   room.on(RoomEvent.Connected, () => {
@@ -289,20 +196,6 @@ function setupRoomListeners(
 
     // Set emotion to INTERESTED when agent connects
     onEmotionUpdate?.("INTERESTED");
-
-    // Handle audio tracks from newly connected participant (if already subscribed)
-    if (audioElementsRef) {
-      participant.audioTrackPublications.forEach((publication) => {
-        if (publication.track && publication.isSubscribed) {
-          handleAudioTrackSubscribed(
-            publication.track,
-            publication,
-            participant,
-            audioElementsRef
-          );
-        }
-      });
-    }
   });
 
   room.on(
@@ -323,8 +216,14 @@ function setupRoomListeners(
       publication: TrackPublication | undefined,
       participant: RemoteParticipant | undefined
     ) => {
-      if (track.kind === "audio" && participant && !participant.isLocal && audioElementsRef) {
-        handleAudioTrackSubscribed(track, publication, participant, audioElementsRef);
+      if (track.kind === "audio" && participant && !participant.isLocal) {
+        console.log("Agent audio track subscribed");
+
+        // Attach audio track to DOM for playback
+        const audioElement = track.attach();
+        audioElement.play().catch((err) => {
+          console.error("Failed to play audio:", err);
+        });
         // Emotion will be set by ActiveSpeakersChanged event
       }
     }
@@ -337,20 +236,7 @@ function setupRoomListeners(
       publication: TrackPublication | undefined,
       participant: RemoteParticipant | undefined
     ) => {
-      if (track.kind === "audio" && audioElementsRef) {
-        const trackId = track.sid || `${participant?.identity || "unknown"}-audio`;
-        const audioElement = audioElementsRef.current.get(trackId);
-        
-        if (audioElement) {
-          audioElement.pause();
-          audioElement.srcObject = null;
-          if (audioElement.parentNode) {
-            audioElement.parentNode.removeChild(audioElement);
-          }
-          audioElementsRef.current.delete(trackId);
-          console.log("Agent audio track unsubscribed and cleaned up:", trackId);
-        }
-        
+      if (track.kind === "audio") {
         track.detach();
       }
     }
