@@ -53,7 +53,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     LISTENING: {
-      d: "M 85,80 L 105,80 L 105,130 L 85,130 Z",
+      d: "M 80,80 L 110,80 L 110,130 L 80,130 Z",
       scale: 1,
     },
     TALKING: {
@@ -88,7 +88,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     LISTENING: {
-      d: "M 195,80 L 215,80 L 215,130 L 195,130 Z",
+      d: "M 190,80 L 220,80 L 220,130 L 190,130 Z",
       scale: 1,
     },
     TALKING: {
@@ -100,13 +100,13 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   // Eyebrow variants for LISTENING state
   const leftEyebrowVariants = {
     LISTENING: {
-      d: "M 70,55 L 110,65 L 110,70 L 70,60 Z",
+      d: "M 65,50 L 115,45 L 115,50 L 65,55 Z",
     }
   };
 
   const rightEyebrowVariants = {
     LISTENING: {
-      d: "M 190,60 L 230,50 L 230,55 L 190,65 Z",
+      d: "M 185,45 L 235,40 L 235,45 L 185,50 Z",
     }
   };
 
