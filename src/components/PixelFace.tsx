@@ -9,9 +9,12 @@ interface PixelFaceProps {
 export const PixelFace = ({ emotion }: PixelFaceProps) => {
   const [blink, setBlink] = useState(false);
 
-  // Blink animation for NEUTRAL state
+  // Blink animation for NEUTRAL state only
   useEffect(() => {
-    if (emotion !== 'NEUTRAL') return;
+    if (emotion !== 'NEUTRAL') {
+      setBlink(false); // Reset blink when changing states
+      return;
+    }
     const interval = setInterval(() => {
       setBlink(true);
       setTimeout(() => setBlink(false), 150);
@@ -46,8 +49,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 0.9,
     },
     INTERESTED: {
-      d: "M 100,100 m -28,0 a 28,28 0 1,0 56,0 a 28,28 0 1,0 -56,0",
-      scale: 1.1,
+      d: "M 72,100 a 28,28 0 1,1 56,0 a 28,28 0 1,1 -56,0",
+      scale: 1,
     },
     LISTENING: {
       d: "M 80,80 Q 80,70 90,70 L 110,70 Q 120,70 120,80 L 120,120 Q 120,130 110,130 L 90,130 Q 80,130 80,120 Z",
@@ -81,8 +84,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1.15,
     },
     INTERESTED: {
-      d: "M 200,100 m -28,0 a 28,28 0 1,0 56,0 a 28,28 0 1,0 -56,0",
-      scale: 1.1,
+      d: "M 172,100 a 28,28 0 1,1 56,0 a 28,28 0 1,1 -56,0",
+      scale: 1,
     },
     LISTENING: {
       d: "M 180,80 Q 180,70 190,70 L 210,70 Q 220,70 220,80 L 220,120 Q 220,130 210,130 L 190,130 Q 180,130 180,120 Z",
@@ -231,10 +234,12 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               ? { y: [-3, 3, -3] }
               : emotion === 'HAPPY'
               ? { y: [-2, 2, -2] }
+              : emotion === 'INTERESTED'
+              ? { x: [-1, 1, -1] }
               : {}
           }
           transition={{
-            duration: emotion === 'HAPPY' ? 2.5 : 2,
+            duration: emotion === 'HAPPY' ? 2.5 : emotion === 'INTERESTED' ? 3 : 2,
             repeat: Infinity,
             ease: "easeInOut"
           }}
