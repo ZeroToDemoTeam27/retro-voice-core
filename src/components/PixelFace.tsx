@@ -253,7 +253,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       d: "M 100,200 L 130,190 L 160,200 L 190,195",
     },
     INTERESTED: {
-      d: "M 140,200 Q 150,195 160,200",
+      d: "M 140,200 Q 150,210 160,200",
     },
     LISTENING: {
       d: "M 140,200 L 160,200",
