@@ -117,18 +117,31 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         {emotion === 'LISTENING' && (
           <>
             <motion.path
-              variants={leftEyebrowVariants}
-              animate={emotion}
-              transition={springTransition}
+              d={leftEyebrowVariants.LISTENING.d}
               fill="hsl(var(--primary))"
               filter="url(#glow)"
+              animate={{
+                y: [-1, 1, -1],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             />
             <motion.path
-              variants={rightEyebrowVariants}
-              animate={emotion}
-              transition={springTransition}
+              d={rightEyebrowVariants.LISTENING.d}
               fill="hsl(var(--primary))"
               filter="url(#glow)"
+              animate={{
+                y: [-1, 1, -1],
+              }}
+              transition={{
+                duration: 2.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.3
+              }}
             />
           </>
         )}
@@ -150,22 +163,77 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         
         {/* Thought bubble for LISTENING state */}
         {emotion === 'LISTENING' && (
-          <motion.g
-            animate={{
-              opacity: [0.4, 1, 0.4],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
+          <motion.g>
             {/* Small dot near eyebrow */}
-            <circle cx="235" cy="65" r="3" fill="hsl(var(--primary))" filter="url(#glow)" />
-            {/* Three dots in a row (ellipsis/loading) */}
-            <circle cx="245" cy="50" r="4" fill="hsl(var(--primary))" filter="url(#glow)" />
-            <circle cx="255" cy="50" r="4" fill="hsl(var(--primary))" filter="url(#glow)" />
-            <circle cx="265" cy="50" r="4" fill="hsl(var(--primary))" filter="url(#glow)" />
+            <motion.circle 
+              cx="235" 
+              cy="65" 
+              r="3" 
+              fill="hsl(var(--primary))" 
+              filter="url(#glow)"
+              animate={{
+                opacity: [0, 1, 1, 1, 1],
+                scale: [0, 1, 1, 1, 1]
+              }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                times: [0, 0.15, 0.6, 0.8, 1],
+                ease: "easeOut"
+              }}
+            />
+            {/* Three dots in a row (ellipsis/loading) - animate one by one */}
+            <motion.circle 
+              cx="245" 
+              cy="50" 
+              r="4" 
+              fill="hsl(var(--primary))" 
+              filter="url(#glow)"
+              animate={{
+                opacity: [0, 0, 1, 1, 1],
+                scale: [0, 0, 1.2, 1, 1]
+              }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                times: [0, 0.2, 0.35, 0.5, 1],
+                ease: "easeOut"
+              }}
+            />
+            <motion.circle 
+              cx="255" 
+              cy="50" 
+              r="4" 
+              fill="hsl(var(--primary))" 
+              filter="url(#glow)"
+              animate={{
+                opacity: [0, 0, 0, 1, 1],
+                scale: [0, 0, 0, 1.2, 1]
+              }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                times: [0, 0.35, 0.45, 0.6, 1],
+                ease: "easeOut"
+              }}
+            />
+            <motion.circle 
+              cx="265" 
+              cy="50" 
+              r="4" 
+              fill="hsl(var(--primary))" 
+              filter="url(#glow)"
+              animate={{
+                opacity: [0, 0, 0, 0, 1],
+                scale: [0, 0, 0, 0, 1.2]
+              }}
+              transition={{
+                duration: 2.4,
+                repeat: Infinity,
+                times: [0, 0.5, 0.6, 0.7, 0.85],
+                ease: "easeOut"
+              }}
+            />
           </motion.g>
         )}
       </>
