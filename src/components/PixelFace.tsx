@@ -45,7 +45,14 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
 
       case 'HAPPY':
         return (
-          <>
+          <motion.g
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             <motion.path
               d="M 80 100 L 100 80 L 120 100 Z"
               fill="hsl(var(--primary))"
@@ -60,7 +67,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               animate={{ opacity: 1 }}
               transition={baseTransition}
             />
-          </>
+          </motion.g>
         );
 
       case 'SAD':
@@ -68,15 +75,27 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           <>
             <motion.rect
               x="80" y="90"
-              width="40" height="60"
+              width="40"
+              height="60"
               fill="hsl(var(--primary))"
-              transition={baseTransition}
+              animate={{ height: [60, 55, 60] }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             />
             <motion.rect
               x="180" y="90"
-              width="40" height="60"
+              width="40"
+              height="60"
               fill="hsl(var(--primary))"
-              transition={baseTransition}
+              animate={{ height: [60, 55, 60] }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
             />
           </>
         );
@@ -101,7 +120,14 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
 
       case 'INTERESTED':
         return (
-          <>
+          <motion.g
+            animate={{ x: [-2, 2, -2] }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
             <motion.circle
               cx="100" cy="100"
               r="25"
@@ -114,22 +140,31 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               fill="hsl(var(--primary))"
               transition={baseTransition}
             />
-          </>
+          </motion.g>
         );
 
       case 'ENGAGED':
         return (
           <>
-            <motion.rect
-              x="80" y="80"
-              width="40" height="40"
-              fill="hsl(var(--primary))"
-            />
-            <motion.rect
-              x="180" y="80"
-              width="40" height="40"
-              fill="hsl(var(--primary))"
-            />
+            <motion.g
+              animate={{ y: [-3, 3, -3] }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <motion.rect
+                x="80" y="80"
+                width="40" height="40"
+                fill="hsl(var(--primary))"
+              />
+              <motion.rect
+                x="180" y="80"
+                width="40" height="40"
+                fill="hsl(var(--primary))"
+              />
+            </motion.g>
             <motion.rect
               x="135" y="30"
               width="30" height="30"
@@ -151,22 +186,22 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               x="80" y="80"
               width="40" height="40"
               fill="hsl(var(--primary))"
-              animate={{ opacity: [1, 0.6, 1] }}
+              animate={{ opacity: [1, 0.7, 1] }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,
-                ease: "linear"
+                ease: "easeInOut"
               }}
             />
             <motion.rect
               x="180" y="80"
               width="40" height="40"
               fill="hsl(var(--primary))"
-              animate={{ opacity: [1, 0.6, 1] }}
+              animate={{ opacity: [1, 0.7, 1] }}
               transition={{
                 duration: 1.5,
                 repeat: Infinity,
-                ease: "linear"
+                ease: "easeInOut"
               }}
             />
           </>
@@ -178,13 +213,13 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
     const baseTransition = { type: "tween" as const, duration: 0.15 };
 
     if (emotion === 'LISTENING') {
-      const bars = [40, 60, 80, 100, 120];
+      const bars = [-20, -10, 0, 10, 20];
       return (
         <g>
-          {bars.map((x, i) => (
+          {bars.map((offset, i) => (
             <motion.rect
               key={i}
-              x={100 + x}
+              x={150 + offset - 5}
               y="180"
               width="10"
               height="40"
@@ -196,7 +231,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
                 duration: 0.6,
                 repeat: Infinity,
                 times: [0, 0.25, 0.5, 0.75, 1],
-                delay: i * 0.1
+                delay: i * 0.1,
+                ease: "easeInOut"
               }}
             />
           ))}
@@ -217,6 +253,21 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         );
 
       case 'HAPPY':
+        return (
+          <motion.path
+            d="M 100 190 Q 150 220 200 190"
+            stroke="hsl(var(--primary))"
+            strokeWidth="4"
+            fill="none"
+            animate={{ d: ["M 100 190 Q 150 220 200 190", "M 100 190 Q 150 225 200 190", "M 100 190 Q 150 220 200 190"] }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          />
+        );
+
       case 'ENGAGED':
         return (
           <motion.path
@@ -246,7 +297,12 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
             stroke="hsl(var(--primary))"
             strokeWidth="4"
             fill="none"
-            transition={baseTransition}
+            animate={{ x: [-3, 3, -3] }}
+            transition={{
+              duration: 2.5,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
           />
         );
 
@@ -256,7 +312,12 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
             cx="150" cy="200"
             rx="15" ry="20"
             fill="hsl(var(--primary))"
-            transition={baseTransition}
+            animate={{ x: [-2, 2, -2] }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
           />
         );
     }
@@ -275,8 +336,17 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         className="retro-glow"
         style={{ filter: 'drop-shadow(0 0 15px rgba(255, 176, 0, 0.4))' }}
       >
-        {renderEyes()}
-        {renderMouth()}
+        <motion.g
+          animate={emotion === 'ENGAGED' ? { y: [-3, 3, -3] } : {}}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          {renderEyes()}
+          {renderMouth()}
+        </motion.g>
       </svg>
     </motion.div>
   );
