@@ -3,20 +3,17 @@ import { CRTOverlay } from '@/components/CRTOverlay';
 import { OrientationLock } from '@/components/OrientationLock';
 import { PixelFace } from '@/components/PixelFace';
 import { DebugTerminal } from '@/components/DebugTerminal';
-
 const VoiceAgentContent = () => {
-  const { emotion } = useVoice();
-
-  return (
-    <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
+  const {
+    emotion
+  } = useVoice();
+  return <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
       <CRTOverlay />
       <OrientationLock />
       
       <div className="flex flex-col items-center justify-center gap-8 z-10">
         <div className="text-center mb-8">
-          <h1 className="text-6xl font-retro text-primary retro-glow mb-2">
-            ANALOG_VOICE_AGENT
-          </h1>
+          <h1 className="text-6xl font-retro text-primary retro-glow mb-2">RUMMI</h1>
           <div className="text-2xl font-retro text-primary opacity-60">
             {'[RETRO_FUTURISM_SYSTEM_v1.0]'}
           </div>
@@ -32,16 +29,11 @@ const VoiceAgentContent = () => {
       </div>
 
       <DebugTerminal />
-    </div>
-  );
+    </div>;
 };
-
 const Index = () => {
-  return (
-    <VoiceProvider>
+  return <VoiceProvider>
       <VoiceAgentContent />
-    </VoiceProvider>
-  );
+    </VoiceProvider>;
 };
-
 export default Index;
