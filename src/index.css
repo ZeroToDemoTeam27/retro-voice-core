@@ -56,6 +56,10 @@ All colors MUST be HSL.
     font-family: 'VT323', monospace;
     overflow-x: hidden;
   }
+
+  button, a, input, textarea, select {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 }
 
 @layer utilities {
@@ -71,5 +75,17 @@ All colors MUST be HSL.
       transparent 1px,
       transparent 4px
     );
+  }
+
+  .smooth-transition {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-scale {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .hover-scale:hover {
+    transform: scale(1.05);
   }
 }
