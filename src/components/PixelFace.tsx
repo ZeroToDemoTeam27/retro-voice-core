@@ -53,8 +53,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     LISTENING: {
-      d: "M 80,80 Q 80,70 90,70 L 110,70 Q 120,70 120,80 L 120,120 Q 120,130 110,130 L 90,130 Q 80,130 80,120 Z",
-      scale: 1,
+      d: "M 70,100 a 30,35 0 1,1 60,0 a 30,35 0 1,1 -60,0",
+      scale: 1.1,
     },
     TALKING: {
       d: "M 80,80 Q 80,70 90,70 L 110,70 Q 120,70 120,80 L 120,120 Q 120,130 110,130 L 90,130 Q 80,130 80,120 Z",
@@ -88,8 +88,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     LISTENING: {
-      d: "M 180,80 Q 180,70 190,70 L 210,70 Q 220,70 220,80 L 220,120 Q 220,130 210,130 L 190,130 Q 180,130 180,120 Z",
-      scale: 1,
+      d: "M 170,100 a 30,35 0 1,1 60,0 a 30,35 0 1,1 -60,0",
+      scale: 1.1,
     },
     TALKING: {
       d: "M 180,80 Q 180,70 190,70 L 210,70 Q 220,70 220,80 L 220,120 Q 220,130 210,130 L 190,130 Q 180,130 180,120 Z",
@@ -115,20 +115,53 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           filter="url(#glow)"
         />
         {emotion === 'LISTENING' && (
-          <motion.g
-            animate={{
-              opacity: [0.6, 1, 0.6],
-              y: [-2, 4, -2]
-            }}
-            transition={{
-              duration: 2.7,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          >
-            <circle cx="150" cy="35" r="18" fill="hsl(var(--primary))" filter="url(#glow)" />
-            <rect x="145" y="50" width="10" height="8" fill="hsl(var(--primary))" />
-          </motion.g>
+          <>
+            {/* Eye pulse animation */}
+            <motion.g
+              animate={{
+                opacity: [0.4, 0.8, 0.4],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <ellipse cx="100" cy="100" rx="35" ry="40" fill="hsl(var(--primary))" opacity="0.3" filter="url(#softGlow)" />
+              <ellipse cx="200" cy="100" rx="35" ry="40" fill="hsl(var(--primary))" opacity="0.3" filter="url(#softGlow)" />
+            </motion.g>
+            
+            {/* Microphone icon - more plump and rounded */}
+            <motion.g
+              animate={{
+                opacity: [0.6, 1, 0.6],
+                y: [-2, 4, -2]
+              }}
+              transition={{
+                duration: 2.7,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <circle cx="150" cy="35" r="22" fill="hsl(var(--primary))" filter="url(#glow)" />
+              <rect x="143" y="52" width="14" height="10" rx="3" fill="hsl(var(--primary))" />
+            </motion.g>
+            
+            {/* Blush circles near smile corners */}
+            <motion.g
+              animate={{
+                opacity: [0.3, 0.5, 0.3],
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              <circle cx="90" cy="195" r="15" fill="hsl(var(--primary))" opacity="0.25" filter="url(#softGlow)" />
+              <circle cx="210" cy="195" r="15" fill="hsl(var(--primary))" opacity="0.25" filter="url(#softGlow)" />
+            </motion.g>
+          </>
         )}
       </>
     );
@@ -150,7 +183,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       d: "M 140,200 Q 150,195 160,200",
     },
     LISTENING: {
-      d: "M 100,190 Q 150,215 200,190",
+      d: "M 110,185 Q 150,225 190,185",
     },
     TALKING: {
       d: "M 120,200 L 180,200",
@@ -214,13 +247,22 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         className="border-none"
         style={{
           backgroundColor: 'hsl(var(--background))',
-          borderRadius: '20px',
-          boxShadow: 'inset 0 0 20px rgba(255, 176, 0, 0.15), 0 0 30px rgba(0,0,0,0.5)',
+          borderRadius: '30px',
+          boxShadow: emotion === 'LISTENING' 
+            ? 'inset 0 0 30px rgba(255, 176, 0, 0.25), 0 0 50px rgba(255, 176, 0, 0.4)'
+            : 'inset 0 0 20px rgba(255, 176, 0, 0.15), 0 0 30px rgba(0,0,0,0.5)',
         }}
       >
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+            <feMerge>
+              <feMergeNode in="coloredBlur" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+          <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="8" result="coloredBlur" />
             <feMerge>
               <feMergeNode in="coloredBlur" />
               <feMergeNode in="SourceGraphic" />
