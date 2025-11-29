@@ -66,10 +66,17 @@ export const PixelFace = ({
           }} />
           </>;
       case 'CONFUSED':
-        return <>
+        return <motion.g animate={{
+          x: [-3, 3, -3],
+          y: [-2, 2, -2]
+        }} transition={{
+          duration: 2.5,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}>
             <motion.rect x="80" y="70" width="50" height="50" fill="hsl(var(--primary))" transition={baseTransition} />
             <motion.rect x="190" y="100" width="30" height="30" fill="hsl(var(--primary))" transition={baseTransition} />
-          </>;
+          </motion.g>;
       case 'INTERESTED':
         return <motion.g animate={{
           x: [-2, 2, -2]
@@ -81,27 +88,37 @@ export const PixelFace = ({
             <motion.circle cx="100" cy="100" r="25" fill="hsl(var(--primary))" transition={baseTransition} />
             <motion.circle cx="200" cy="100" r="25" fill="hsl(var(--primary))" transition={baseTransition} />
           </motion.g>;
-      case 'ENGAGED':
+      case 'LISTENING':
         return <>
-            <motion.g animate={{
-            y: [-3, 3, -3]
+            <motion.rect x="80" y="80" width="40" height="40" fill="hsl(var(--primary))" animate={{
+            opacity: [1, 0.7, 1]
           }} transition={{
-            duration: 2,
+            duration: 1.5,
             repeat: Infinity,
             ease: "easeInOut"
-          }}>
-              <motion.rect x="80" y="80" width="40" height="40" fill="hsl(var(--primary))" />
-              <motion.rect x="180" y="80" width="40" height="40" fill="hsl(var(--primary))" />
-            </motion.g>
-            <motion.rect x="135" y="30" width="30" height="30" fill="hsl(var(--primary))" animate={{
-            rotate: 360
-          }} transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: "linear"
           }} />
+            <motion.rect x="180" y="80" width="40" height="40" fill="hsl(var(--primary))" animate={{
+            opacity: [1, 0.7, 1]
+          }} transition={{
+            duration: 1.5,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }} />
+            {/* Lightbulb */}
+            <motion.g animate={{
+              opacity: [0.6, 1, 0.6]
+            }} transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}>
+              {/* Bulb */}
+              <circle cx="150" cy="35" r="18" fill="hsl(var(--primary))" />
+              {/* Base */}
+              <rect x="145" y="50" width="10" height="8" fill="hsl(var(--primary))" />
+            </motion.g>
           </>;
-      case 'LISTENING':
+      case 'TALKING':
         return <>
             <motion.rect x="80" y="80" width="40" height="40" fill="hsl(var(--primary))" animate={{
             opacity: [1, 0.7, 1]
@@ -125,7 +142,7 @@ export const PixelFace = ({
       type: "tween" as const,
       duration: 0.15
     };
-    if (emotion === 'LISTENING') {
+    if (emotion === 'TALKING') {
       const bars = [-20, -10, 0, 10, 20];
       return <g>
           {bars.map((offset, i) => <motion.rect key={i} x={150 + offset - 5} y="180" width="10" height="40" fill="hsl(var(--primary))" animate={{
@@ -150,7 +167,7 @@ export const PixelFace = ({
           repeat: Infinity,
           ease: "easeInOut"
         }} />;
-      case 'ENGAGED':
+      case 'LISTENING':
         return <motion.path d="M 100 190 Q 150 220 200 190" stroke="hsl(var(--primary))" strokeWidth="4" fill="none" transition={baseTransition} />;
       case 'SAD':
         return <motion.path d="M 100 210 Q 150 180 200 210" stroke="hsl(var(--primary))" strokeWidth="4" fill="none" transition={baseTransition} />;
@@ -164,7 +181,8 @@ export const PixelFace = ({
         }} />;
       case 'INTERESTED':
         return <motion.ellipse cx="150" cy="200" rx="15" ry="20" fill="hsl(var(--primary))" animate={{
-          x: [-2, 2, -2]
+          x: [-2, 2, -2],
+          scale: [1, 1.15, 1]
         }} transition={{
           duration: 2,
           repeat: Infinity,
@@ -172,7 +190,7 @@ export const PixelFace = ({
         }} />;
     }
   };
-  return <motion.div className="flex items-center justify-center" animate={emotion === 'ENGAGED' ? {
+  return <motion.div className="flex items-center justify-center" animate={emotion === 'LISTENING' ? {
     scale: 1.1
   } : {
     scale: 1
@@ -183,7 +201,7 @@ export const PixelFace = ({
       <svg width="300" height="300" viewBox="0 0 300 300" style={{
       filter: 'drop-shadow(0 0 15px rgba(255, 176, 0, 0.4))'
     }} className="retro-glow border-none">
-        <motion.g animate={emotion === 'ENGAGED' ? {
+        <motion.g animate={emotion === 'LISTENING' ? {
         y: [-3, 3, -3]
       } : {}} transition={{
         duration: 2,
