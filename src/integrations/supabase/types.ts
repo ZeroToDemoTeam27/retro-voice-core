@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      knowledge_base: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_size: number
+          file_type: string
+          file_url: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_size?: number
+          file_type?: string
+          file_url?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_base_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
