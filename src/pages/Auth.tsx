@@ -77,6 +77,7 @@ const Auth = () => {
           title: 'Success!',
           description: 'Account created successfully. Please check your email to confirm.',
         });
+        setIsSignUp(false);
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
