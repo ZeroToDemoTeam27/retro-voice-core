@@ -53,8 +53,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     LISTENING: {
-      d: "M 70,100 a 30,35 0 1,1 60,0 a 30,35 0 1,1 -60,0",
-      scale: 1.1,
+      d: "M 85,80 L 105,80 L 105,130 L 85,130 Z",
+      scale: 1,
     },
     TALKING: {
       d: "M 80,80 Q 80,70 90,70 L 110,70 Q 120,70 120,80 L 120,120 Q 120,130 110,130 L 90,130 Q 80,130 80,120 Z",
@@ -88,8 +88,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     LISTENING: {
-      d: "M 170,100 a 30,35 0 1,1 60,0 a 30,35 0 1,1 -60,0",
-      scale: 1.1,
+      d: "M 195,80 L 215,80 L 215,130 L 195,130 Z",
+      scale: 1,
     },
     TALKING: {
       d: "M 180,80 Q 180,70 190,70 L 210,70 Q 220,70 220,80 L 220,120 Q 220,130 210,130 L 190,130 Q 180,130 180,120 Z",
@@ -97,9 +97,42 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
     },
   };
 
+  // Eyebrow variants for LISTENING state
+  const leftEyebrowVariants = {
+    LISTENING: {
+      d: "M 70,55 L 110,65 L 110,70 L 70,60 Z",
+    }
+  };
+
+  const rightEyebrowVariants = {
+    LISTENING: {
+      d: "M 190,60 L 230,50 L 230,55 L 190,65 Z",
+    }
+  };
+
   const renderEyes = () => {
     return (
       <>
+        {/* Eyebrows for LISTENING state */}
+        {emotion === 'LISTENING' && (
+          <>
+            <motion.path
+              variants={leftEyebrowVariants}
+              animate={emotion}
+              transition={springTransition}
+              fill="hsl(var(--primary))"
+              filter="url(#glow)"
+            />
+            <motion.path
+              variants={rightEyebrowVariants}
+              animate={emotion}
+              transition={springTransition}
+              fill="hsl(var(--primary))"
+              filter="url(#glow)"
+            />
+          </>
+        )}
+        
         <motion.path
           variants={leftEyeVariants}
           animate={emotion}
@@ -114,54 +147,26 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           fill="hsl(var(--primary))"
           filter="url(#glow)"
         />
+        
+        {/* Thought bubble for LISTENING state */}
         {emotion === 'LISTENING' && (
-          <>
-            {/* Eye pulse animation */}
-            <motion.g
-              animate={{
-                opacity: [0.4, 0.8, 0.4],
-              }}
-              transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <ellipse cx="100" cy="100" rx="35" ry="40" fill="hsl(var(--primary))" opacity="0.3" filter="url(#softGlow)" />
-              <ellipse cx="200" cy="100" rx="35" ry="40" fill="hsl(var(--primary))" opacity="0.3" filter="url(#softGlow)" />
-            </motion.g>
-            
-            {/* Microphone icon - more plump and rounded */}
-            <motion.g
-              animate={{
-                opacity: [0.6, 1, 0.6],
-                y: [-2, 4, -2]
-              }}
-              transition={{
-                duration: 2.7,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <circle cx="150" cy="35" r="22" fill="hsl(var(--primary))" filter="url(#glow)" />
-              <rect x="143" y="52" width="14" height="10" rx="3" fill="hsl(var(--primary))" />
-            </motion.g>
-            
-            {/* Blush circles near smile corners */}
-            <motion.g
-              animate={{
-                opacity: [0.3, 0.5, 0.3],
-              }}
-              transition={{
-                duration: 3,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-            >
-              <circle cx="90" cy="195" r="15" fill="hsl(var(--primary))" opacity="0.25" filter="url(#softGlow)" />
-              <circle cx="210" cy="195" r="15" fill="hsl(var(--primary))" opacity="0.25" filter="url(#softGlow)" />
-            </motion.g>
-          </>
+          <motion.g
+            animate={{
+              opacity: [0.4, 1, 0.4],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+          >
+            {/* Small dot near eyebrow */}
+            <circle cx="235" cy="65" r="3" fill="hsl(var(--primary))" filter="url(#glow)" />
+            {/* Three dots in a row (ellipsis/loading) */}
+            <circle cx="245" cy="50" r="4" fill="hsl(var(--primary))" filter="url(#glow)" />
+            <circle cx="255" cy="50" r="4" fill="hsl(var(--primary))" filter="url(#glow)" />
+            <circle cx="265" cy="50" r="4" fill="hsl(var(--primary))" filter="url(#glow)" />
+          </motion.g>
         )}
       </>
     );
@@ -183,7 +188,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       d: "M 140,200 Q 150,195 160,200",
     },
     LISTENING: {
-      d: "M 110,185 Q 150,225 190,185",
+      d: "M 140,200 L 160,200",
     },
     TALKING: {
       d: "M 120,200 L 180,200",
@@ -225,8 +230,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         variants={mouthVariants}
         animate={emotion}
         stroke="hsl(var(--primary))"
-        strokeWidth="4"
-        fill="none"
+        strokeWidth={emotion === 'LISTENING' ? 0 : 4}
+        fill={emotion === 'LISTENING' ? "hsl(var(--primary))" : "none"}
         strokeLinecap="round"
         strokeLinejoin="round"
         transition={springTransition}
