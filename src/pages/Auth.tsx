@@ -59,6 +59,25 @@ const Auth = () => {
       }
 
       if (isSignUp) {
+        // Check if username already exists
+        if (username) {
+          const { data: existingProfile } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('username', username.trim())
+            .single();
+
+          if (existingProfile) {
+            toast({
+              title: 'Error',
+              description: 'Username already taken. Please choose another one.',
+              variant: 'destructive',
+            });
+            setLoading(false);
+            return;
+          }
+        }
+
         const redirectUrl = `${window.location.origin}/`;
         const { error } = await supabase.auth.signUp({
           email,
@@ -79,8 +98,32 @@ const Auth = () => {
         });
         setIsSignUp(false);
       } else {
+        // Check if login is with email or username
+        let loginEmail = email;
+        
+        // If input doesn't contain @, treat it as username
+        if (!email.includes('@')) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('username', email.trim())
+            .single();
+
+          if (!profile?.email) {
+            toast({
+              title: 'Error',
+              description: 'Username not found',
+              variant: 'destructive',
+            });
+            setLoading(false);
+            return;
+          }
+          
+          loginEmail = profile.email;
+        }
+
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: loginEmail,
           password,
         });
 
@@ -134,12 +177,12 @@ const Auth = () => {
             
             <div className="space-y-2">
               <Label htmlFor="email" className="font-retro text-primary">
-                Email
+                {isSignUp ? 'Email' : 'Email or Username'}
               </Label>
               <Input
                 id="email"
-                type="email"
-                placeholder="you@example.com"
+                type={isSignUp ? "email" : "text"}
+                placeholder={isSignUp ? "you@example.com" : "email or username"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
