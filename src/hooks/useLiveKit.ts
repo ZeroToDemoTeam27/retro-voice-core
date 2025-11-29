@@ -29,6 +29,7 @@ export const useLiveKit = (
   const [error, setError] = useState<string | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const roomRef = useRef<Room | null>(null);
+  const audioElementsRef = useRef<Map<string, HTMLAudioElement>>(new Map());
 
   const connect = useCallback(
     async (
@@ -71,7 +72,7 @@ export const useLiveKit = (
         });
 
         // Set up event listeners before connecting
-        setupRoomListeners(newRoom, onEmotionUpdate);
+        setupRoomListeners(newRoom, onEmotionUpdate, audioElementsRef);
 
         // Connect to room
         await newRoom.connect(livekitUrl, token);
@@ -107,6 +108,16 @@ export const useLiveKit = (
   );
 
   const disconnect = useCallback(async () => {
+    // Clean up all audio elements
+    audioElementsRef.current.forEach((audioElement) => {
+      audioElement.pause();
+      audioElement.srcObject = null;
+      if (audioElement.parentNode) {
+        audioElement.parentNode.removeChild(audioElement);
+      }
+    });
+    audioElementsRef.current.clear();
+    
     if (roomRef.current) {
       roomRef.current.disconnect();
       roomRef.current = null;
@@ -134,6 +145,16 @@ export const useLiveKit = (
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      // Clean up all audio elements
+      audioElementsRef.current.forEach((audioElement) => {
+        audioElement.pause();
+        audioElement.srcObject = null;
+        if (audioElement.parentNode) {
+          audioElement.parentNode.removeChild(audioElement);
+        }
+      });
+      audioElementsRef.current.clear();
+      
       if (roomRef.current) {
         roomRef.current.disconnect();
       }
@@ -154,7 +175,8 @@ export const useLiveKit = (
 
 function setupRoomListeners(
   room: Room,
-  onEmotionUpdate?: (emotion: EmotionState) => void
+  onEmotionUpdate?: (emotion: EmotionState) => void,
+  audioElementsRef?: React.MutableRefObject<Map<string, HTMLAudioElement>>
 ) {
   // Handle connection state changes
   room.on(RoomEvent.Connected, () => {
@@ -217,14 +239,35 @@ function setupRoomListeners(
       participant: RemoteParticipant | undefined
     ) => {
       if (track.kind === "audio" && participant && !participant.isLocal) {
-        console.log("Agent audio track subscribed");
+        console.log("Agent audio track subscribed:", track.sid);
 
-        // Attach audio track to DOM for playback
-        const audioElement = track.attach();
-        audioElement.play().catch((err) => {
-          console.error("Failed to play audio:", err);
-        });
-        // Emotion will be set by ActiveSpeakersChanged event
+        const trackId = track.sid || `${participant.identity}-audio`;
+        
+        // Create and configure audio element
+        const audioElement = track.attach() as HTMLAudioElement;
+        audioElement.autoplay = true;
+        audioElement.volume = 1.0;
+        audioElement.setAttribute("playsinline", "true");
+        audioElement.setAttribute("data-participant", participant.identity);
+        audioElement.setAttribute("data-track-id", trackId);
+        
+        // Add to DOM (hidden) to ensure playback works in all browsers
+        audioElement.style.display = "none";
+        document.body.appendChild(audioElement);
+        
+        // Track the audio element for cleanup
+        if (audioElementsRef) {
+          audioElementsRef.current.set(trackId, audioElement);
+        }
+
+        // Play audio with error handling
+        audioElement.play()
+          .then(() => {
+            console.log("Agent audio playback started:", trackId);
+          })
+          .catch((err) => {
+            console.error("Failed to play agent audio:", err);
+          });
       }
     }
   );
@@ -236,7 +279,20 @@ function setupRoomListeners(
       publication: TrackPublication | undefined,
       participant: RemoteParticipant | undefined
     ) => {
-      if (track.kind === "audio") {
+      if (track.kind === "audio" && audioElementsRef) {
+        const trackId = track.sid || `${participant?.identity || "unknown"}-audio`;
+        const audioElement = audioElementsRef.current.get(trackId);
+        
+        if (audioElement) {
+          audioElement.pause();
+          audioElement.srcObject = null;
+          if (audioElement.parentNode) {
+            audioElement.parentNode.removeChild(audioElement);
+          }
+          audioElementsRef.current.delete(trackId);
+          console.log("Agent audio track unsubscribed and cleaned up:", trackId);
+        }
+        
         track.detach();
       }
     }
