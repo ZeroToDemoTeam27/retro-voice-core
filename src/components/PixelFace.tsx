@@ -106,9 +106,10 @@ export const PixelFace = ({
           }} />
             {/* Lightbulb */}
             <motion.g animate={{
-              opacity: [0.6, 1, 0.6]
+              opacity: [0.6, 1, 0.6],
+              y: [-2, 4, -2]
             }} transition={{
-              duration: 2,
+              duration: 2.7,
               repeat: Infinity,
               ease: "easeInOut"
             }}>
