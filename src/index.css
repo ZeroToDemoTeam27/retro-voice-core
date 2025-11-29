@@ -54,7 +54,7 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
     font-family: 'VT323', monospace;
-    overflow: hidden;
+    overflow-x: hidden;
   }
 }
 
