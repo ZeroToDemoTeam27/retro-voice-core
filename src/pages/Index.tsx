@@ -15,7 +15,7 @@ const VoiceAgentContent = () => {
         <div className="text-center mb-8">
           <h1 className="text-6xl font-retro text-primary retro-glow mb-2">RUMMI</h1>
           <div className="text-2xl font-retro text-primary opacity-60">
-            {'[RETRO_FUTURISM_SYSTEM_v1.0]'}
+            Your personal coach
           </div>
         </div>
 
