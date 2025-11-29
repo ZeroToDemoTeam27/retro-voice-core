@@ -5,18 +5,29 @@ import { OrientationLock } from '@/components/OrientationLock';
 import { PixelFace } from '@/components/PixelFace';
 import { DebugTerminal } from '@/components/DebugTerminal';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { User } from 'lucide-react';
 
 const VoiceAgentContent = () => {
   const { emotion } = useVoice();
   const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   
   return (
     <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
       <CRTOverlay />
       <OrientationLock />
       
-      {/* Sign Out Button */}
-      <div className="absolute top-4 right-4 z-20">
+      {/* Top Navigation */}
+      <div className="absolute top-4 right-4 z-20 flex gap-2">
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={() => navigate('/profile')}
+          className="font-retro"
+        >
+          <User className="h-4 w-4" />
+        </Button>
         <Button 
           variant="outline" 
           onClick={signOut}
