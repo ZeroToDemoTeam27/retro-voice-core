@@ -237,8 +237,12 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   return (
     <motion.div
       className="flex items-center justify-center"
-      animate={emotion === 'LISTENING' ? { scale: 1.08 } : { scale: 1 }}
-      transition={springTransition}
+      animate={emotion === 'LISTENING' ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+      transition={
+        emotion === 'LISTENING'
+          ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
+          : springTransition
+      }
     >
       <svg
         width="300"
