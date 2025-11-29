@@ -157,7 +157,7 @@ const Auth = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-primary"
+                className="border-primary opacity-50"
               />
             </div>
 
