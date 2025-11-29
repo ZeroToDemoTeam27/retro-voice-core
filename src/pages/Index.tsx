@@ -7,7 +7,7 @@ import { PixelFace } from '@/components/PixelFace';
 import { DebugTerminal } from '@/components/DebugTerminal';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { User, Minimize2, Maximize2, Mic, MicOff, Power, PowerOff } from 'lucide-react';
+import { User, Minimize2, Maximize2, Mic, MicOff, Power, PowerOff, Maximize } from 'lucide-react';
 import { useLiveKit } from '@/hooks/useLiveKit';
 import { toast } from 'sonner';
 
@@ -16,6 +16,7 @@ const VoiceAgentContent = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const [focusMode, setFocusMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const {
     isConnected,
@@ -54,6 +55,28 @@ const VoiceAgentContent = () => {
     await disconnect();
     toast.info('Disconnected from RUMMI');
   };
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+        setIsFullscreen(true);
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    } catch (err) {
+      toast.error('Fullscreen not supported');
+    }
+  };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
   
   return (
     <div className="min-h-screen bg-background flex items-center justify-center overflow-hidden relative">
@@ -81,8 +104,8 @@ const VoiceAgentContent = () => {
         </div>
       )}
 
-      {/* Focus Mode Toggle */}
-      <div className={`absolute ${focusMode ? 'top-4 right-4' : 'top-4 left-4'} z-20 animate-fade-in`}>
+      {/* Focus Mode and Fullscreen Toggles */}
+      <div className={`absolute ${focusMode ? 'top-4 right-4' : 'top-4 left-4'} z-20 flex gap-2 animate-fade-in`}>
         <Button 
           variant="outline" 
           size="icon"
@@ -91,6 +114,15 @@ const VoiceAgentContent = () => {
           title={focusMode ? "Exit Focus Mode" : "Enter Focus Mode"}
         >
           {focusMode ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
+        </Button>
+        <Button 
+          variant="outline" 
+          size="icon"
+          onClick={toggleFullscreen}
+          className="font-retro"
+          title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+        >
+          {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
         </Button>
       </div>
 
