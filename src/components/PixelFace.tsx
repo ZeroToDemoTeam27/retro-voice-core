@@ -222,7 +222,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         },
       }}
     >
-      <svg width="300" height="300" viewBox="0 -30 300 300">
+      <svg width="300" height="300" viewBox="0 -50 300 300">
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
