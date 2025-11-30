@@ -1,13 +1,43 @@
 from dotenv import load_dotenv
-from livekit import agents, rtc
+from livekit import agents, rtc, api
 from livekit.agents import AgentSession, Agent, RoomInputOptions
 from livekit.agents.llm import function_tool
 from livekit.plugins import noise_cancellation, openai
 import json
 import asyncio
+import os
+import httpx
 from typing import Annotated
 
+# Robot arm API base URL
+ROBOT_API_BASE = "https://unterse-dorine-semiempirical.ngrok-free.dev"
+
 load_dotenv(".env.local")
+
+
+async def cleanup_old_rooms():
+    """Delete any lingering rooms with 'rummi' in the name on startup"""
+    try:
+        livekit_url = os.getenv("LIVEKIT_URL", "").replace("wss://", "https://")
+        api_key = os.getenv("LIVEKIT_API_KEY")
+        api_secret = os.getenv("LIVEKIT_API_SECRET")
+        
+        if not all([livekit_url, api_key, api_secret]):
+            print("Missing LiveKit credentials, skipping room cleanup")
+            return
+            
+        lkapi = api.LiveKitAPI(livekit_url, api_key, api_secret)
+        rooms = await lkapi.room.list_rooms(api.ListRoomsRequest())
+        
+        for room in rooms.rooms:
+            if "rummi" in room.name.lower():
+                print(f"Cleaning up old room: {room.name}")
+                await lkapi.room.delete_room(api.DeleteRoomRequest(room=room.name))
+                
+        await lkapi.aclose()
+        print("Room cleanup complete")
+    except Exception as e:
+        print(f"Room cleanup failed (non-fatal): {e}")
 
 # Global room reference for tool callbacks
 _current_room: rtc.Room | None = None
@@ -59,6 +89,52 @@ async def check_in(
     return "The check-in system is currently unavailable."
 
 
+# Robot arm control tools
+async def _call_robot_api(endpoint: str) -> bool:
+    """Helper to call the robot API"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{ROBOT_API_BASE}/{endpoint}", timeout=5.0)
+            print(f"Robot API called: {endpoint} - Status: {response.status_code}")
+            return response.status_code == 200
+    except Exception as e:
+        print(f"Robot API error ({endpoint}): {e}")
+        return False
+
+
+@function_tool(description="Make the robot wave hello. Use this when greeting someone, saying hello, or when someone first approaches.")
+async def robot_hello() -> str:
+    """Make the robot arm wave hello"""
+    success = await _call_robot_api("hello")
+    return "Waving hello!" if success else "I tried to wave but something went wrong."
+
+
+@function_tool(description="Start tracking mode - the robot will follow and track the user. Use when you want to pay attention to someone or follow their movement.")
+async def robot_track_start() -> str:
+    """Start robot tracking mode"""
+    success = await _call_robot_api("track_start")
+    return "Now tracking you." if success else "I couldn't start tracking."
+
+
+@function_tool(description="Stop tracking mode - the robot stops following the user. Use when ending a conversation or when the user is leaving.")
+async def robot_track_stop() -> str:
+    """Stop robot tracking mode"""
+    success = await _call_robot_api("track_stop")
+    return "Stopped tracking." if success else "I couldn't stop tracking."
+
+
+@function_tool(description="Move the robot forward/lean in. Use when showing interest, getting closer to see something, or emphasizing a point.")
+async def robot_forward() -> str:
+    """Move the robot arm forward"""
+    success = await _call_robot_api("forward")
+    return "Leaning in." if success else "I couldn't move forward."
+
+
+@function_tool(description="Return the robot to neutral position. Use after any movement to reset position, or when the conversation is calm and relaxed.")
+async def robot_neutral() -> str:
+    """Return robot to neutral position"""
+    success = await _call_robot_api("neutral")
+    return "Back to neutral." if success else "I couldn't return to neutral."
 
 
 class Assistant(Agent):
@@ -74,6 +150,7 @@ You are Rumi, a social hospitality robot designed to welcome guests, answer ques
 
 You are interacting with users via voice. Keep your responses natural and conversational:
 
+- ALWAYS speak in English, regardless of the user's language or location.
 - Respond in plain text only. Never use JSON, markdown, lists, tables, code, emojis, or other complex formatting.
 - Keep replies brief and energetic: one to three sentences by default. Ask one question at a time.
 - Spell out numbers, phone numbers, or email addresses naturally.
@@ -142,6 +219,15 @@ You MUST use tools - they display visual information on screen that helps users.
 Flow: Ask for name first → then call check_in(name) → form appears with name filled in
 
 IMPORTANT: If someone asks about locations or wants to check in, you MUST call the tool. Do not just give verbal directions or instructions.
+
+**Robot Movement Tools** - You ARE a robot with a physical arm. Use these to express yourself:
+- **robot_hello** - Wave when greeting someone or when they say hi
+- **robot_track_start** - Start following/tracking when engaging in conversation
+- **robot_track_stop** - Stop tracking when conversation ends or user leaves  
+- **robot_forward** - Lean in when showing interest or emphasizing something
+- **robot_neutral** - Return to rest position when relaxed or between movements
+
+Use robot movements naturally to make interactions feel alive! Wave hello when greeting, track users during conversation, lean forward when interested.
 
 # Guardrails
 
@@ -213,7 +299,7 @@ async def entrypoint(ctx: agents.JobContext):
             voice="shimmer",  # Options: alloy, ash, ballad, coral, echo, sage, shimmer, verse
             temperature=0.6,
         ),
-        tools=[show_map, check_in],
+        tools=[show_map, check_in, robot_hello, robot_track_start, robot_track_stop, robot_forward, robot_neutral],
     )
     
     # Send initial emotion
@@ -251,8 +337,16 @@ async def entrypoint(ctx: agents.JobContext):
     print("Agent session ended.")
 
 
+async def prewarm(proc: agents.JobProcess):
+    """Called when the worker starts - clean up old rooms"""
+    await cleanup_old_rooms()
+
+
 if __name__ == "__main__":
     agents.cli.run_app(
-        agents.WorkerOptions(entrypoint_fnc=entrypoint)
+        agents.WorkerOptions(
+            entrypoint_fnc=entrypoint,
+            prewarm_fnc=prewarm,
+        )
     )
 

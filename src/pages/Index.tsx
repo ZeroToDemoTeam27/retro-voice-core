@@ -71,8 +71,8 @@ const VoiceAgentContent = () => {
   // Handle check-in form submission
   const handleCheckInSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!checkInName.trim() || !checkInEmail.trim()) {
-      toast.error("Please fill in all fields");
+    if (!checkInName.trim()) {
+      toast.error("Please enter your name");
       return;
     }
 
@@ -381,7 +381,7 @@ const VoiceAgentContent = () => {
 
                 <div>
                   <label className="block text-sm font-retro text-primary mb-2">
-                    EMAIL ADDRESS
+                    EMAIL ADDRESS <span className="opacity-50">(optional)</span>
                   </label>
                   <Input
                     type="email"
