@@ -340,8 +340,14 @@ async def entrypoint(ctx: agents.JobContext):
         disconnect_event.set()
     
     # Keep running until the room disconnects
-    await disconnect_event.wait()
-    print("Agent session ended.")
+    try:
+        await disconnect_event.wait()
+    finally:
+        # Properly close the session
+        _current_room = None
+        print("Closing agent session...")
+        await session.aclose()
+        print("Agent session ended.")
 
 
 async def prewarm(proc: agents.JobProcess):
