@@ -9,8 +9,9 @@ interface PixelFaceProps {
 export const PixelFace = ({ emotion }: PixelFaceProps) => {
   const [blink, setBlink] = useState(false);
   const [squeeze, setSqueeze] = useState(false);
+  const [eyeSmile, setEyeSmile] = useState(false);
 
-  // Blink animation for NEUTRAL, SAD, and TALKING states
+  // Natural blink animation with variations for TALKING state
   useEffect(() => {
     const shouldBlink =
       emotion === "NEUTRAL" || emotion === "SAD" || emotion === "TALKING";
@@ -20,13 +21,49 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       return;
     }
 
-    // More frequent blinking: every 2 seconds
-    const interval = setInterval(() => {
-      setBlink(true);
-      setTimeout(() => setBlink(false), 200);
-    }, 2000);
+    const scheduleNextBlink = () => {
+      // Vary blink intervals for naturalness (2-4 seconds)
+      const nextBlinkDelay =
+        emotion === "TALKING" ? 2000 + Math.random() * 2000 : 2000;
 
-    return () => clearInterval(interval);
+      // Vary blink duration (150-300ms)
+      const blinkDuration =
+        emotion === "TALKING" ? 150 + Math.random() * 150 : 200;
+
+      return setTimeout(() => {
+        setBlink(true);
+        setTimeout(() => {
+          setBlink(false);
+          if (shouldBlink) {
+            timeoutRef = scheduleNextBlink();
+          }
+        }, blinkDuration);
+      }, nextBlinkDelay);
+    };
+
+    let timeoutRef = scheduleNextBlink();
+
+    return () => {
+      if (timeoutRef) clearTimeout(timeoutRef);
+    };
+  }, [emotion]);
+
+  // Eye smile animation for TALKING state
+  useEffect(() => {
+    if (emotion !== "TALKING") {
+      setEyeSmile(false);
+      return;
+    }
+
+    const smileInterval = setInterval(() => {
+      // Randomly smile with eyes (30% chance every 3 seconds)
+      if (Math.random() > 0.7) {
+        setEyeSmile(true);
+        setTimeout(() => setEyeSmile(false), 800);
+      }
+    }, 3000);
+
+    return () => clearInterval(smileInterval);
   }, [emotion]);
 
   // Occasional bigger squeeze for TALKING state
@@ -85,7 +122,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     TALKING: {
-      d: "M 60,70 Q 60,50 80,50 L 120,50 Q 140,50 140,70 L 140,130 Q 140,150 120,150 L 80,150 Q 60,150 60,130 Z",
+      // Slightly more relaxed shape for natural talking
+      d: "M 60,75 Q 60,55 80,55 L 120,55 Q 140,55 140,75 L 140,125 Q 140,145 120,145 L 80,145 Q 60,145 60,125 Z",
       scale: 1,
     },
   };
@@ -114,7 +152,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     TALKING: {
-      d: "M 160,70 Q 160,50 180,50 L 220,50 Q 240,50 240,70 L 240,130 Q 240,150 220,150 L 180,150 Q 160,150 160,130 Z",
+      // Slightly more relaxed shape for natural talking
+      d: "M 160,75 Q 160,55 180,55 L 220,55 Q 240,55 240,75 L 240,125 Q 240,145 220,145 L 180,145 Q 160,145 160,125 Z",
       scale: 1,
     },
   };
@@ -171,13 +210,21 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         <motion.path
           variants={leftEyeVariants}
           animate={{
-            ...leftEyeVariants[emotion],
-            y: emotion === "TALKING" ? 0 : [-1, 1, -1],
+            // Use happy eye shape when smiling during talking
+            ...(emotion === "TALKING" && eyeSmile
+              ? leftEyeVariants.HAPPY
+              : leftEyeVariants[emotion]),
+            y:
+              emotion === "TALKING"
+                ? squeeze
+                  ? 0
+                  : [-1.5, 1.5, -1.5]
+                : [-1, 1, -1],
             x:
               emotion === "TALKING"
                 ? squeeze
                   ? -8 // Move left eye left when squeezing
-                  : 0
+                  : [-1, 1, -1]
                 : [-0.5, 0.5, -0.5],
             scaleY:
               (emotion === "NEUTRAL" ||
@@ -191,25 +238,32 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
             scaleX:
               emotion === "TALKING" && squeeze
                 ? 1.18 // More horizontal expansion when squeezing
+                : emotion === "TALKING" && eyeSmile
+                ? 1.03
                 : 1,
           }}
           transition={{
             ...springTransition,
             y:
-              emotion === "TALKING"
+              emotion === "TALKING" && squeeze
                 ? undefined
-                : { duration: 3, repeat: Infinity, ease: "easeInOut" },
+                : {
+                    duration: emotion === "TALKING" ? 2.2 : 3,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  },
             x:
-              emotion === "TALKING"
+              emotion === "TALKING" && squeeze
                 ? { duration: 0.2, ease: "easeInOut" }
                 : {
-                    duration: 4,
+                    duration: emotion === "TALKING" ? 2.8 : 4,
                     repeat: Infinity,
                     ease: "easeInOut",
                     delay: 0.5,
                   },
-            scaleY: { duration: 0.2, ease: "easeInOut" },
-            scaleX: { duration: 0.2, ease: "easeInOut" },
+            scaleY: { duration: 0.15, ease: "easeInOut" },
+            scaleX: { duration: 0.4, ease: "easeInOut" },
+            d: { duration: 0.4, ease: "easeInOut" },
           }}
           transformOrigin="100 100"
           fill="hsl(var(--primary))"
@@ -218,13 +272,21 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         <motion.path
           variants={rightEyeVariants}
           animate={{
-            ...rightEyeVariants[emotion],
-            y: emotion === "TALKING" ? 0 : [-0.5, 1.5, -0.5],
+            // Use happy eye shape when smiling during talking
+            ...(emotion === "TALKING" && eyeSmile
+              ? rightEyeVariants.HAPPY
+              : rightEyeVariants[emotion]),
+            y:
+              emotion === "TALKING"
+                ? squeeze
+                  ? 0
+                  : [-1, 2, -1]
+                : [-0.5, 1.5, -0.5],
             x:
               emotion === "TALKING"
                 ? squeeze
                   ? 8 // Move right eye right when squeezing
-                  : 0
+                  : [1, -1, 1]
                 : [0.5, -0.5, 0.5],
             scaleY:
               (emotion === "NEUTRAL" ||
@@ -238,30 +300,33 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
             scaleX:
               emotion === "TALKING" && squeeze
                 ? 1.18 // More horizontal expansion when squeezing
+                : emotion === "TALKING" && eyeSmile
+                ? 1.03
                 : 1,
           }}
           transition={{
             ...springTransition,
             y:
-              emotion === "TALKING"
+              emotion === "TALKING" && squeeze
                 ? undefined
                 : {
-                    duration: 3.2,
+                    duration: emotion === "TALKING" ? 2.5 : 3.2,
                     repeat: Infinity,
                     ease: "easeInOut",
                     delay: 0.3,
                   },
             x:
-              emotion === "TALKING"
+              emotion === "TALKING" && squeeze
                 ? { duration: 0.2, ease: "easeInOut" }
                 : {
-                    duration: 3.8,
+                    duration: emotion === "TALKING" ? 3.2 : 3.8,
                     repeat: Infinity,
                     ease: "easeInOut",
                     delay: 0.8,
                   },
-            scaleY: { duration: 0.2, ease: "easeInOut" },
-            scaleX: { duration: 0.2, ease: "easeInOut" },
+            scaleY: { duration: 0.15, ease: "easeInOut" },
+            scaleX: { duration: 0.4, ease: "easeInOut" },
+            d: { duration: 0.4, ease: "easeInOut" },
           }}
           transformOrigin="200 100"
           fill="hsl(var(--primary))"
