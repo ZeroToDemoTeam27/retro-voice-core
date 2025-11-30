@@ -5,7 +5,6 @@ export type EmotionState =
   | 'HAPPY' 
   | 'SAD' 
   | 'CONFUSED' 
-  | 'INTERESTED' 
   | 'LISTENING' 
   | 'TALKING';
 

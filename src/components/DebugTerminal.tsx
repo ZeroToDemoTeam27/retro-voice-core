@@ -11,7 +11,6 @@ export const DebugTerminal = () => {
     'HAPPY',
     'SAD',
     'CONFUSED',
-    'INTERESTED',
     'LISTENING',
     'TALKING'
   ];
