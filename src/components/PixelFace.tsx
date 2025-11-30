@@ -97,16 +97,16 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
     },
   };
 
-  // Eyebrow variants for LISTENING state
+  // Eyebrow variants for LISTENING state - adjusted for larger eyes
   const leftEyebrowVariants = {
     LISTENING: {
-      d: "M 65,50 L 115,45 L 115,50 L 65,55 Z",
+      d: "M 50,30 L 130,25 L 130,32 L 50,37 Z",
     }
   };
 
   const rightEyebrowVariants = {
     LISTENING: {
-      d: "M 185,45 L 235,40 L 235,45 L 185,50 Z",
+      d: "M 170,25 L 250,20 L 250,27 L 170,32 Z",
     }
   };
 
@@ -177,14 +177,14 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           filter="url(#glow)"
         />
         
-        {/* Thought bubble for LISTENING state */}
+        {/* Thought bubble for LISTENING state - adjusted for larger eyes */}
         {emotion === 'LISTENING' && (
           <motion.g>
             {/* Small dot near eyebrow */}
             <motion.circle 
-              cx="235" 
-              cy="65" 
-              r="3" 
+              cx="255" 
+              cy="45" 
+              r="4" 
               fill="hsl(var(--primary))" 
               filter="url(#glow)"
               animate={{
@@ -200,9 +200,9 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
             />
             {/* Three dots in a row (ellipsis/loading) - animate one by one */}
             <motion.circle 
-              cx="245" 
-              cy="50" 
-              r="4" 
+              cx="268" 
+              cy="30" 
+              r="5" 
               fill="hsl(var(--primary))" 
               filter="url(#glow)"
               animate={{
@@ -217,9 +217,9 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               }}
             />
             <motion.circle 
-              cx="255" 
-              cy="50" 
-              r="4" 
+              cx="280" 
+              cy="30" 
+              r="5" 
               fill="hsl(var(--primary))" 
               filter="url(#glow)"
               animate={{
@@ -234,9 +234,9 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               }}
             />
             <motion.circle 
-              cx="265" 
-              cy="50" 
-              r="4" 
+              cx="292" 
+              cy="30" 
+              r="5" 
               fill="hsl(var(--primary))" 
               filter="url(#glow)"
               animate={{
