@@ -1,16 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdmin } from '@/hooks/useAdmin';
 import { Settings, LayoutDashboard, Bot, Server, Database, X } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 
 export const AdminQuickAccess = () => {
-  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-
-  if (!isAdmin) return null;
 
   const quickLinks = [
     { path: '/admin', label: 'Dashboard', icon: LayoutDashboard },
