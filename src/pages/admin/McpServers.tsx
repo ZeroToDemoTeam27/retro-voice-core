@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Server } from 'lucide-react';
 import { toast } from 'sonner';
 import { McpServerDialog } from '@/components/admin/McpServerDialog';
 import {
@@ -55,23 +55,30 @@ export default function McpServers() {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-retro text-foreground mb-2">MCP Servers</h1>
-          <p className="text-muted-foreground">Manage Model Context Protocol server connections</p>
+          <h1 className="text-4xl font-retro text-foreground mb-2 retro-glow">MCP Servers</h1>
+          <p className="text-muted-foreground font-retro">Connect and manage Model Context Protocol servers</p>
         </div>
-        <Button onClick={() => setDialogOpen(true)}>
+        <Button onClick={() => setDialogOpen(true)} className="font-retro shadow-lg hover:shadow-amber-glow transition-all">
           <Plus className="h-4 w-4 mr-2" />
           Add MCP Server
         </Button>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div className="text-center py-12 text-muted-foreground font-retro">
+          <div className="animate-pulse">Loading...</div>
+        </div>
       ) : servers?.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <p>No MCP servers configured yet</p>
+        <div className="text-center py-20 border-2 border-dashed border-primary/30 rounded-2xl bg-muted/20">
+          <Server className="h-16 w-16 mx-auto mb-4 text-primary/50" />
+          <p className="text-lg font-retro text-muted-foreground mb-4">No MCP servers configured</p>
+          <Button onClick={() => setDialogOpen(true)} className="font-retro">
+            <Plus className="h-4 w-4 mr-2" />
+            Add your first server
+          </Button>
         </div>
       ) : (
-        <div className="border rounded-lg bg-card">
+        <div className="border-2 border-primary/20 rounded-xl bg-card shadow-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>

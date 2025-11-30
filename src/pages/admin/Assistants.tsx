@@ -65,11 +65,11 @@ export default function Assistants() {
     <div>
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-4xl font-retro text-foreground mb-2">Assistants</h1>
-          <p className="text-muted-foreground">Manage your AI voice assistants</p>
+          <h1 className="text-4xl font-retro text-foreground mb-2 retro-glow">Assistants</h1>
+          <p className="text-muted-foreground font-retro">Configure and manage AI voice assistants</p>
         </div>
         <Link to="/admin/assistants/new">
-          <Button>
+          <Button className="font-retro shadow-lg hover:shadow-amber-glow transition-all">
             <Plus className="h-4 w-4 mr-2" />
             Create Assistant
           </Button>
@@ -77,14 +77,22 @@ export default function Assistants() {
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div className="text-center py-12 text-muted-foreground font-retro">
+          <div className="animate-pulse">Loading...</div>
+        </div>
       ) : assistants?.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Bot className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>No assistants yet. Create your first one!</p>
+        <div className="text-center py-20 border-2 border-dashed border-primary/30 rounded-2xl bg-muted/20">
+          <Bot className="h-16 w-16 mx-auto mb-4 text-primary/50" />
+          <p className="text-lg font-retro text-muted-foreground mb-4">No assistants yet</p>
+          <Link to="/admin/assistants/new">
+            <Button className="font-retro">
+              <Plus className="h-4 w-4 mr-2" />
+              Create your first assistant
+            </Button>
+          </Link>
         </div>
       ) : (
-        <div className="border rounded-lg bg-card">
+        <div className="border-2 border-primary/20 rounded-xl bg-card shadow-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
