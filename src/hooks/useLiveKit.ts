@@ -5,6 +5,8 @@ import {
   RemoteParticipant,
   Track,
   TrackPublication,
+  ParticipantKind,
+  Participant,
 } from "livekit-client";
 import { generateLiveKitToken } from "@/lib/livekit-token";
 import { EmotionState } from "@/contexts/VoiceContext";
@@ -173,14 +175,98 @@ export const useLiveKit = (
   };
 };
 
+/**
+ * Maps agent state from LiveKit to emotion state
+ * @param agentState - The agent state from lk.agent.state attribute
+ * @returns The corresponding emotion state
+ */
+function mapAgentStateToEmotion(agentState: string | undefined): EmotionState {
+  switch (agentState) {
+    case "initializing":
+      return "NEUTRAL";
+    case "listening":
+      return "LISTENING";
+    case "thinking":
+      return "CONFUSED";
+    case "speaking":
+      // 50/50 chance between TALKING and HAPPY - random every time
+      return Math.random() < 0.5 ? "TALKING" : "HAPPY";
+    default:
+      return "NEUTRAL";
+  }
+}
+
+/**
+ * Finds the agent participant in the room
+ * @param room - The LiveKit room
+ * @returns The agent participant if found, null otherwise
+ */
+function findAgentParticipant(room: Room): Participant | null {
+  // Check remote participants
+  for (const participant of room.remoteParticipants.values()) {
+    if (participant.isAgent || participant.kind === ParticipantKind.AGENT) {
+      return participant;
+    }
+  }
+  return null;
+}
+
+/**
+ * Updates emotion based on agent state from participant attributes
+ * @param participant - The participant (should be agent)
+ * @param onEmotionUpdate - Callback to update emotion
+ * @param currentAgentState - Current agent state to detect transitions
+ * @returns New agent state
+ */
+function updateEmotionFromAgentState(
+  participant: Participant,
+  onEmotionUpdate?: (emotion: EmotionState) => void,
+  currentAgentState?: string
+): string | undefined {
+  const agentState = participant.attributes?.["lk.agent.state"];
+  if (!agentState) {
+    return undefined;
+  }
+
+  // Only update emotion when state actually changes (to avoid flickering)
+  // This ensures we pick a new random emotion when entering speaking state
+  const stateChanged = agentState !== currentAgentState;
+  
+  if (stateChanged) {
+    const emotion = mapAgentStateToEmotion(agentState);
+    console.log(`Agent state: ${agentState} -> Emotion: ${emotion}`);
+    onEmotionUpdate?.(emotion);
+  }
+
+  return agentState;
+}
+
 function setupRoomListeners(
   room: Room,
   onEmotionUpdate?: (emotion: EmotionState) => void,
   audioElementsRef?: React.MutableRefObject<Map<string, HTMLAudioElement>>
 ) {
+  // Track current agent state to detect transitions
+  let currentAgentState: string | undefined = undefined;
+
+  // Check for existing agent participant and set initial emotion
+  // This handles the case where agent connects before we set up listeners
+  const checkExistingAgent = () => {
+    const agentParticipant = findAgentParticipant(room);
+    if (agentParticipant) {
+      currentAgentState = updateEmotionFromAgentState(
+        agentParticipant,
+        onEmotionUpdate,
+        currentAgentState
+      );
+    }
+  };
+
   // Handle connection state changes
   room.on(RoomEvent.Connected, () => {
     console.log("Connected to LiveKit room");
+    // Small delay to ensure participants are loaded
+    setTimeout(checkExistingAgent, 100);
   });
 
   room.on(RoomEvent.Disconnected, () => {
@@ -216,8 +302,16 @@ function setupRoomListeners(
   room.on(RoomEvent.ParticipantConnected, (participant: RemoteParticipant) => {
     console.log("Participant connected:", participant.identity);
 
-    // Set emotion to NEUTRAL when agent connects
-    onEmotionUpdate?.("NEUTRAL");
+    // Check if this is an agent participant
+    if (participant.isAgent || participant.kind === ParticipantKind.AGENT) {
+      console.log("Agent participant connected");
+      // Update emotion based on agent's initial state
+      currentAgentState = updateEmotionFromAgentState(
+        participant,
+        onEmotionUpdate,
+        currentAgentState
+      );
+    }
   });
 
   room.on(
@@ -226,7 +320,29 @@ function setupRoomListeners(
       console.log("Participant disconnected:", participant.identity);
 
       // Set emotion to NEUTRAL when agent disconnects
-      onEmotionUpdate?.("NEUTRAL");
+      if (participant.isAgent || participant.kind === ParticipantKind.AGENT) {
+        console.log("Agent participant disconnected");
+        currentAgentState = undefined;
+        onEmotionUpdate?.("NEUTRAL");
+      }
+    }
+  );
+
+  // Handle participant attributes changes (for agent state updates)
+  room.on(
+    RoomEvent.ParticipantAttributesChanged,
+    (changedAttributes: Record<string, string>, participant: Participant) => {
+      // Only process if this is an agent participant
+      if (participant.isAgent || participant.kind === ParticipantKind.AGENT) {
+        // Check if lk.agent.state was changed
+        if ("lk.agent.state" in changedAttributes) {
+          currentAgentState = updateEmotionFromAgentState(
+            participant,
+            onEmotionUpdate,
+            currentAgentState
+          );
+        }
+      }
     }
   );
 
@@ -297,21 +413,4 @@ function setupRoomListeners(
       }
     }
   );
-
-  // Handle speaking events
-  room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
-    if (speakers.length > 0) {
-      const speaker = speakers[0];
-      if (speaker && !speaker.isLocal) {
-        // Agent is speaking
-        onEmotionUpdate?.("TALKING");
-      } else if (speaker && speaker.isLocal) {
-        // User is speaking
-        onEmotionUpdate?.("LISTENING");
-      }
-    } else {
-      // No one speaking
-      onEmotionUpdate?.("NEUTRAL");
-    }
-  });
 }
