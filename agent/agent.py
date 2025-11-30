@@ -231,11 +231,16 @@ async def entrypoint(ctx: agents.JobContext):
     
     # Create the agent session with OpenAI Realtime API
     # OpenAI has more reliable tool calling than Gemini
+    openai_api_key = os.getenv("OPENAI_API_KEY")
+    if not openai_api_key:
+        raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it in your .env file.")
+    
     session = AgentSession(
         llm=openai.realtime.RealtimeModel(
             model="gpt-realtime",
             voice="shimmer",  # Options: alloy, ash, ballad, coral, echo, sage, shimmer, verse
             temperature=0.6,
+            api_key=openai_api_key,
         ),
         tools=[show_map, check_in],
     )
