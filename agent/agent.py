@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from livekit import agents, rtc
 from livekit.agents import AgentSession, Agent, RoomInputOptions
 from livekit.agents.llm import function_tool
-from livekit.plugins import noise_cancellation, google
+from livekit.plugins import noise_cancellation, openai
 import json
 import asyncio
 from typing import Annotated
@@ -14,7 +14,7 @@ _current_room: rtc.Room | None = None
 
 
 # Tool definitions for the hackathon assistant
-@function_tool(description="Show the hackathon venue map to help the user navigate. Use this when someone asks for directions, where something is located, or wants to see the map of the space.")
+@function_tool(description="ALWAYS call this tool when the user mentions ANY of these: map, directions, where is, find, location, navigate, looking for, bathroom, restroom, food, drinks, stage, mentor area. This displays a visual map on screen.")
 async def show_map() -> str:
     """Display the venue map overlay in the frontend"""
     if _current_room:
@@ -35,7 +35,7 @@ async def show_map() -> str:
     return "The map display is currently unavailable."
 
 
-@function_tool(description="Open the hackathon check-in interface with the participant's name pre-filled. You MUST ask for the person's name first before calling this tool. Once you have their name, call this tool to display the check-in form.")
+@function_tool(description="ALWAYS call this tool when the user mentions ANY of these: check in, checking in, register, sign in, arrived, attendance, here for the hackathon. First ask for their name, then call this tool with the name to show the check-in form on screen.")
 async def check_in(
     name: Annotated[str, "The name of the person checking in. Ask for this before calling the tool."],
 ) -> str:
@@ -123,15 +123,25 @@ You are interacting with users via voice. Keep your responses natural and conver
 - Catch attention of passersby and invite them to learn more about the event
 - Create memorable interactions that reflect the innovative, AI-first spirit of Zero2Demo
 
-# Available Tools
+# CRITICAL: Tool Usage Rules
 
-You have access to tools that display information on the screen:
+You MUST use tools - they display visual information on screen that helps users. Never just describe when you can show.
 
-1. **show_map** - Use this when someone asks for directions, wants to find something, or asks to see the venue map. This displays the hackathon venue map.
+**show_map** - IMMEDIATELY call this tool when user says ANY of:
+- "map", "show map", "see the map"
+- "where is", "where's the", "find the"
+- "directions", "how do I get to"
+- "bathroom", "restroom", "toilet", "food", "drinks", "snacks"
+- "stage", "demo area", "mentor", "hacking area"
+- Any question about location or navigation
 
-2. **check_in(name)** - Use this when someone wants to check in or register their attendance. IMPORTANT: You must ask for their name first before calling this tool. Once you have their name, call check_in with their name to open the form with their name pre-filled.
+**check_in(name)** - Call this tool when user says ANY of:
+- "check in", "checking in", "want to check in"
+- "register", "sign in", "sign up"
+- "I'm here", "just arrived", "attendance"
+Flow: Ask for name first → then call check_in(name) → form appears with name filled in
 
-Use these tools proactively when relevant - don't just describe things if you can show them!
+IMPORTANT: If someone asks about locations or wants to check in, you MUST call the tool. Do not just give verbal directions or instructions.
 
 # Guardrails
 
@@ -195,12 +205,13 @@ async def entrypoint(ctx: agents.JobContext):
             # No one speaking
             asyncio.create_task(send_emotion_update("NEUTRAL"))
     
-    # Create the agent session with Gemini Live API
+    # Create the agent session with OpenAI Realtime API
+    # OpenAI has more reliable tool calling than Gemini
     session = AgentSession(
-        llm=google.realtime.RealtimeModel(
-            model="gemini-2.0-flash-exp",
-            voice="Puck",
-            temperature=0.8,
+        llm=openai.realtime.RealtimeModel(
+            model="gpt-realtime",
+            voice="shimmer",  # Options: alloy, ash, ballad, coral, echo, sage, shimmer, verse
+            temperature=0.6,
         ),
         tools=[show_map, check_in],
     )
