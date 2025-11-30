@@ -197,7 +197,7 @@ function mapAgentStateToEmotion(agentState: string | undefined): EmotionState {
     case "listening":
       return "LISTENING";
     case "thinking":
-      return "CONFUSED";
+      return "THINKING";
     case "speaking":
       // 50/50 chance between TALKING and HAPPY - random every time
       return Math.random() < 0.5 ? "TALKING" : "HAPPY";
