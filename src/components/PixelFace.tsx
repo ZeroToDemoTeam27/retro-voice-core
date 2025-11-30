@@ -45,7 +45,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1,
     },
     CONFUSED: {
-      d: "M 65,75 Q 65,55 85,55 L 125,55 Q 145,55 145,75 L 145,125 Q 145,145 125,145 L 85,145 Q 65,145 65,125 Z",
+      d: "M 55,75 Q 55,55 75,55 L 115,55 Q 135,55 135,75 L 135,125 Q 135,145 115,145 L 75,145 Q 55,145 55,125 Z",
       scale: 0.9,
     },
     INTERESTED: {
@@ -80,7 +80,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
     },
     CONFUSED: {
       // Asymmetry: right eye stays wider when confused
-      d: "M 155,65 Q 155,45 180,45 L 225,45 Q 250,45 250,65 L 250,135 Q 250,155 225,155 L 180,155 Q 155,155 155,135 Z",
+      d: "M 165,65 Q 165,45 190,45 L 235,45 Q 260,45 260,65 L 260,135 Q 260,155 235,155 L 190,155 Q 165,155 165,135 Z",
       scale: 1.15,
     },
     INTERESTED: {
