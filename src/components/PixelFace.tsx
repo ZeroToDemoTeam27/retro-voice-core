@@ -148,15 +148,31 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         
         <motion.path
           variants={leftEyeVariants}
-          animate={emotion}
-          transition={springTransition}
+          animate={{
+            ...leftEyeVariants[emotion],
+            y: [-1, 1, -1],
+            x: [-0.5, 0.5, -0.5]
+          }}
+          transition={{
+            ...springTransition,
+            y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            x: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
+          }}
           fill="hsl(var(--primary))"
           filter="url(#glow)"
         />
         <motion.path
           variants={rightEyeVariants}
-          animate={emotion}
-          transition={springTransition}
+          animate={{
+            ...rightEyeVariants[emotion],
+            y: [-0.5, 1.5, -0.5],
+            x: [0.5, -0.5, 0.5]
+          }}
+          transition={{
+            ...springTransition,
+            y: { duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 },
+            x: { duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }
+          }}
           fill="hsl(var(--primary))"
           filter="url(#glow)"
         />
