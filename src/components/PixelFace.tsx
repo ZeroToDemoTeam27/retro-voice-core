@@ -239,74 +239,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       </>
     );
   };
-  const mouthVariants = {
-    NEUTRAL: {
-      d: "M 120,200 L 180,200",
-    },
-    HAPPY: {
-      d: "M 100,190 Q 150,220 200,190",
-    },
-    SAD: {
-      d: "M 100,210 Q 150,180 200,210",
-    },
-    CONFUSED: {
-      d: "M 100,200 L 130,190 L 160,200 L 190,195",
-    },
-    INTERESTED: {
-      d: "M 140,200 Q 150,210 160,200",
-    },
-    LISTENING: {
-      d: "M 140,200 L 160,200",
-    },
-    TALKING: {
-      d: "M 120,200 L 180,200",
-    },
-  };
 
-  const renderMouth = () => {
-    if (emotion === 'TALKING') {
-      const bars = [-20, -10, 0, 10, 20];
-      return (
-        <g>
-          {bars.map((offset, i) => (
-            <motion.rect
-              key={i}
-              x={150 + offset - 5}
-              y="180"
-              width="10"
-              height="40"
-              fill="hsl(var(--primary))"
-              animate={{
-                height: [40, 60, 30, 70, 40]
-              }}
-              transition={{
-                duration: 0.6,
-                repeat: Infinity,
-                times: [0, 0.25, 0.5, 0.75, 1],
-                delay: i * 0.1,
-                ease: "easeInOut"
-              }}
-              filter="url(#glow)"
-            />
-          ))}
-        </g>
-      );
-    }
-
-    return (
-      <motion.path
-        variants={mouthVariants}
-        animate={emotion}
-        stroke="hsl(var(--primary))"
-        strokeWidth={emotion === 'LISTENING' ? 0 : 4}
-        fill={emotion === 'LISTENING' ? "hsl(var(--primary))" : "none"}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        transition={springTransition}
-        filter="url(#glow)"
-      />
-    );
-  };
   return (
     <motion.div
       className="flex items-center justify-center"
@@ -321,14 +254,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         width="300"
         height="300"
         viewBox="0 0 300 300"
-        className="border-none"
-        style={{
-          backgroundColor: 'hsl(var(--background))',
-          borderRadius: '30px',
-          boxShadow: emotion === 'LISTENING' 
-            ? 'inset 0 0 30px rgba(255, 176, 0, 0.25), 0 0 50px rgba(255, 176, 0, 0.4)'
-            : 'inset 0 0 20px rgba(255, 176, 0, 0.15), 0 0 30px rgba(0,0,0,0.5)',
-        }}
       >
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
@@ -364,7 +289,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           }}
         >
           {renderEyes()}
-          {renderMouth()}
         </motion.g>
       </svg>
     </motion.div>
