@@ -55,10 +55,10 @@ export const AdminLayout = ({ children }: AdminLayoutProps) => {
                 {user?.email?.[0].toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="hidden md:block">
-              <div className="text-sm font-medium">{user?.email?.split('@')[0]}</div>
-              <div className="text-xs text-muted-foreground">Administrator</div>
-            </div>
+              <div className="hidden md:block">
+                <div className="text-sm font-medium">{user?.email?.split('@')[0]}</div>
+                <div className="text-xs text-muted-foreground">Dashboard User</div>
+              </div>
           </div>
           <Button variant="ghost" size="sm" onClick={signOut} className="font-retro">
             <LogOut className="h-4 w-4" />
