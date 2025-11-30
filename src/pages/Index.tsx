@@ -407,6 +407,20 @@ const VoiceAgentContent = () => {
                   />
                 </div>
 
+                <div>
+                  <label className="block text-sm font-retro text-primary mb-2">
+                    EMAIL ADDRESS <span className="opacity-50">(optional)</span>
+                  </label>
+                  <Input
+                    type="email"
+                    value={checkInEmail}
+                    onChange={(e) => setCheckInEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="font-retro"
+                    disabled={isCheckingIn}
+                  />
+                </div>
+
                 <Button
                   type="submit"
                   className="w-full font-retro mt-6"
