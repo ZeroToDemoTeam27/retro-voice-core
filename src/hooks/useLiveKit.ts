@@ -216,8 +216,8 @@ function setupRoomListeners(
   room.on(RoomEvent.ParticipantConnected, (participant: RemoteParticipant) => {
     console.log("Participant connected:", participant.identity);
 
-    // Set emotion to INTERESTED when agent connects
-    onEmotionUpdate?.("INTERESTED");
+    // Set emotion to NEUTRAL when agent connects
+    onEmotionUpdate?.("NEUTRAL");
   });
 
   room.on(

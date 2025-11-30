@@ -48,10 +48,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       d: "M 55,75 Q 55,55 75,55 L 115,55 Q 135,55 135,75 L 135,125 Q 135,145 115,145 L 75,145 Q 55,145 55,125 Z",
       scale: 0.9,
     },
-    INTERESTED: {
-      d: "M 50,100 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0",
-      scale: 1,
-    },
     LISTENING: {
       d: "M 60,70 L 120,70 L 120,150 L 60,150 Z",
       scale: 1,
@@ -82,10 +78,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       // Asymmetry: right eye stays wider when confused
       d: "M 165,65 Q 165,45 190,45 L 235,45 Q 260,45 260,65 L 260,135 Q 260,155 235,155 L 190,155 Q 165,155 165,135 Z",
       scale: 1.15,
-    },
-    INTERESTED: {
-      d: "M 150,100 a 40,40 0 1,1 80,0 a 40,40 0 1,1 -80,0",
-      scale: 1,
     },
     LISTENING: {
       d: "M 170,70 L 240,70 L 240,150 L 170,150 Z",
@@ -294,12 +286,10 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               ? { y: [-3, 3, -3] }
               : emotion === 'HAPPY'
               ? { y: [-2, 2, -2] }
-              : emotion === 'INTERESTED'
-              ? { x: [-1, 1, -1] }
               : {}
           }
           transition={{
-            duration: emotion === 'HAPPY' ? 2.5 : emotion === 'INTERESTED' ? 3 : 2,
+            duration: emotion === 'HAPPY' ? 2.5 : 2,
             repeat: Infinity,
             ease: "easeInOut"
           }}
