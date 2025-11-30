@@ -273,7 +273,9 @@ const VoiceAgentContent = () => {
           </div>
         )}
 
-        <PixelFace emotion={emotion} />
+        <div className={focusMode ? "scale-[2.5]" : ""}>
+          <PixelFace emotion={emotion} />
+        </div>
 
         {/* Status - Hidden in focus mode */}
         {!focusMode && (
