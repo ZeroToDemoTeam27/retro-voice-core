@@ -8,6 +8,7 @@ interface PixelFaceProps {
 
 export const PixelFace = ({ emotion }: PixelFaceProps) => {
   const [blink, setBlink] = useState(false);
+  const [squeeze, setSqueeze] = useState(false);
 
   // Blink animation for NEUTRAL, SAD, and TALKING states
   useEffect(() => {
@@ -26,6 +27,33 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
     }, 2000);
 
     return () => clearInterval(interval);
+  }, [emotion]);
+
+  // Occasional bigger squeeze for TALKING state
+  useEffect(() => {
+    if (emotion !== "TALKING") {
+      setSqueeze(false);
+      return;
+    }
+
+    const scheduleSqueeze = () => {
+      // Random interval between 3-4 seconds
+      const delay = 3000 + Math.random() * 1000;
+
+      const timeout = setTimeout(() => {
+        setSqueeze(true);
+        // Hold squeeze for 0.5-1 second
+        setTimeout(() => {
+          setSqueeze(false);
+          scheduleSqueeze(); // Schedule next squeeze
+        }, 500 + Math.random() * 500);
+      }, delay);
+
+      return timeout;
+    };
+
+    const timeout = scheduleSqueeze();
+    return () => clearTimeout(timeout);
   }, [emotion]);
 
   // Spring transition for natural movement
@@ -144,21 +172,44 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           variants={leftEyeVariants}
           animate={{
             ...leftEyeVariants[emotion],
-            y: [-1, 1, -1],
-            x: [-0.5, 0.5, -0.5],
+            y: emotion === "TALKING" ? 0 : [-1, 1, -1],
+            x:
+              emotion === "TALKING"
+                ? squeeze
+                  ? -8 // Move left eye left when squeezing
+                  : 0
+                : [-0.5, 0.5, -0.5],
             scaleY:
               (emotion === "NEUTRAL" ||
                 emotion === "SAD" ||
                 emotion === "TALKING") &&
               blink
                 ? 0.1
+                : emotion === "TALKING" && squeeze
+                ? 0.65 // Higher intensity squeeze when triggered
+                : 1,
+            scaleX:
+              emotion === "TALKING" && squeeze
+                ? 1.18 // More horizontal expansion when squeezing
                 : 1,
           }}
           transition={{
             ...springTransition,
-            y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-            x: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
-            scaleY: { duration: 0.15, ease: "easeInOut" },
+            y:
+              emotion === "TALKING"
+                ? undefined
+                : { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            x:
+              emotion === "TALKING"
+                ? { duration: 0.2, ease: "easeInOut" }
+                : {
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.5,
+                  },
+            scaleY: { duration: 0.2, ease: "easeInOut" },
+            scaleX: { duration: 0.2, ease: "easeInOut" },
           }}
           transformOrigin="100 100"
           fill="hsl(var(--primary))"
@@ -168,31 +219,49 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           variants={rightEyeVariants}
           animate={{
             ...rightEyeVariants[emotion],
-            y: [-0.5, 1.5, -0.5],
-            x: [0.5, -0.5, 0.5],
+            y: emotion === "TALKING" ? 0 : [-0.5, 1.5, -0.5],
+            x:
+              emotion === "TALKING"
+                ? squeeze
+                  ? 8 // Move right eye right when squeezing
+                  : 0
+                : [0.5, -0.5, 0.5],
             scaleY:
               (emotion === "NEUTRAL" ||
                 emotion === "SAD" ||
                 emotion === "TALKING") &&
               blink
                 ? 0.1
+                : emotion === "TALKING" && squeeze
+                ? 0.65 // Higher intensity squeeze when triggered
+                : 1,
+            scaleX:
+              emotion === "TALKING" && squeeze
+                ? 1.18 // More horizontal expansion when squeezing
                 : 1,
           }}
           transition={{
             ...springTransition,
-            y: {
-              duration: 3.2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.3,
-            },
-            x: {
-              duration: 3.8,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 0.8,
-            },
-            scaleY: { duration: 0.15, ease: "easeInOut" },
+            y:
+              emotion === "TALKING"
+                ? undefined
+                : {
+                    duration: 3.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.3,
+                  },
+            x:
+              emotion === "TALKING"
+                ? { duration: 0.2, ease: "easeInOut" }
+                : {
+                    duration: 3.8,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                    delay: 0.8,
+                  },
+            scaleY: { duration: 0.2, ease: "easeInOut" },
+            scaleX: { duration: 0.2, ease: "easeInOut" },
           }}
           transformOrigin="200 100"
           fill="hsl(var(--primary))"
