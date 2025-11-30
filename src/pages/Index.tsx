@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { VoiceProvider, useVoice } from "@/contexts/VoiceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { AdminQuickAccess } from "@/components/AdminQuickAccess";
 import { CRTOverlay } from "@/components/CRTOverlay";
 import { OrientationLock } from "@/components/OrientationLock";
 import { PixelFace } from "@/components/PixelFace";
@@ -20,6 +21,7 @@ import {
   X,
   MapPin,
   CheckCircle,
+  Settings,
 } from "lucide-react";
 import { useLiveKit, ToolCallEvent } from "@/hooks/useLiveKit";
 import { toast } from "sonner";
@@ -149,6 +151,15 @@ const VoiceAgentContent = () => {
           <Button
             variant="outline"
             size="icon"
+            onClick={() => navigate("/admin")}
+            className="font-retro"
+            title="Dashboard"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
             onClick={() => navigate("/profile")}
             className="font-retro"
           >
@@ -262,7 +273,9 @@ const VoiceAgentContent = () => {
           </div>
         )}
 
-        <PixelFace emotion={emotion} />
+        <div className={focusMode ? "scale-[3]" : ""}>
+          <PixelFace emotion={emotion} />
+        </div>
 
         {/* Status - Hidden in focus mode */}
         {!focusMode && (
@@ -282,29 +295,38 @@ const VoiceAgentContent = () => {
       {/* Debug Terminal - Hidden in focus mode */}
       {!focusMode && <DebugTerminal />}
 
+      {/* Admin Quick Access - Hidden in focus mode */}
+      {!focusMode && <AdminQuickAccess />}
+
       {/* Map Overlay */}
       {showMap && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in">
-          <div className="relative w-[90vw] max-w-4xl">
-            {/* Close button */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowMap(false)}
-              className="absolute -top-12 right-0 font-retro z-10"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in"
+          onClick={() => setShowMap(false)}
+        >
+          <div 
+            className="relative w-[85vw] h-[85vh] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Map container */}
-            <div className="relative bg-background border-4 border-primary p-4 retro-glow">
+            <div className="relative bg-background border-4 border-primary p-4 retro-glow flex flex-col h-full">
+              {/* Close button */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowMap(false)}
+                className="absolute top-4 right-4 font-retro z-10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+
               <div className="flex items-center gap-2 mb-4">
                 <MapPin className="h-6 w-6 text-primary" />
                 <h2 className="text-2xl font-retro text-primary">VENUE MAP</h2>
               </div>
 
               {/* Map image */}
-              <div className="relative aspect-[16/10] bg-muted overflow-hidden border-2 border-primary/50">
+              <div className="relative flex-1 bg-muted overflow-hidden border-2 border-primary/50 min-h-0">
                 <img
                   src="/hackathon-map.png"
                   alt="Hackathon Venue Map"
@@ -345,20 +367,26 @@ const VoiceAgentContent = () => {
 
       {/* Check-In Modal */}
       {showCheckIn && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in">
-          <div className="relative w-[90vw] max-w-md">
-            {/* Close button */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => setShowCheckIn(false)}
-              className="absolute -top-12 right-0 font-retro z-10"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in"
+          onClick={() => setShowCheckIn(false)}
+        >
+          <div 
+            className="relative w-[85vw] h-[85vh] max-w-2xl max-h-[600px] flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Check-in form container */}
-            <div className="bg-background border-4 border-primary p-6 retro-glow">
+            <div className="bg-background border-4 border-primary p-6 retro-glow flex flex-col h-full justify-center relative">
+              {/* Close button */}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setShowCheckIn(false)}
+                className="absolute top-4 right-4 font-retro z-10"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+
               <div className="flex items-center gap-2 mb-6">
                 <CheckCircle className="h-6 w-6 text-primary" />
                 <h2 className="text-2xl font-retro text-primary">CHECK IN</h2>

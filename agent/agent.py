@@ -1,3 +1,5 @@
+# IMPORTANT: Load environment variables BEFORE importing livekit modules
+# The LiveKit CLI checks for environment variables during initialization
 from dotenv import load_dotenv
 from livekit import agents, rtc, api
 from livekit.agents import AgentSession, Agent, RoomInputOptions
@@ -349,4 +351,3 @@ if __name__ == "__main__":
             prewarm_fnc=prewarm,
         )
     )
-
