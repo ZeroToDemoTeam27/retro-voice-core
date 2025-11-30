@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdmin } from '@/hooks/useAdmin';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,7 +9,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Upload, FileText, Trash2 } from 'lucide-react';
+import { ArrowLeft, Upload, FileText, Trash2, Settings, Shield } from 'lucide-react';
 
 type KnowledgeBaseFile = {
   id: string;
@@ -21,6 +22,7 @@ type KnowledgeBaseFile = {
 
 const Profile = () => {
   const { user } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -320,6 +322,35 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-background p-4 py-8">
       <div className="w-full max-w-2xl mx-auto space-y-6">
+      
+      {/* Admin Access Card */}
+      {isAdmin && (
+        <Card className="w-full border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-transparent">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-primary rounded-lg shadow-amber-glow">
+                  <Shield className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <div className="font-retro text-lg font-bold text-foreground">Administrator Access</div>
+                  <div className="text-sm text-muted-foreground">
+                    You have admin privileges to manage the system
+                  </div>
+                </div>
+              </div>
+              <Button 
+                onClick={() => navigate('/admin')}
+                className="font-retro"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Admin Dashboard
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="w-full">
         <CardHeader>
           <div className="flex items-center gap-4">

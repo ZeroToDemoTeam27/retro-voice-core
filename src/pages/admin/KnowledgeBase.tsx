@@ -33,19 +33,24 @@ export default function KnowledgeBase() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-4xl font-retro text-foreground mb-2">Knowledge Base</h1>
-        <p className="text-muted-foreground">All uploaded files across assistants</p>
+        <h1 className="text-4xl font-retro text-foreground mb-2 retro-glow">Knowledge Base</h1>
+        <p className="text-muted-foreground font-retro">View and manage all uploaded files across assistants</p>
       </div>
 
       {isLoading ? (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div className="text-center py-12 text-muted-foreground font-retro">
+          <div className="animate-pulse">Loading...</div>
+        </div>
       ) : files?.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>No files uploaded yet</p>
+        <div className="text-center py-20 border-2 border-dashed border-primary/30 rounded-2xl bg-muted/20">
+          <File className="h-16 w-16 mx-auto mb-4 text-primary/50" />
+          <p className="text-lg font-retro text-muted-foreground">No files uploaded yet</p>
+          <p className="text-sm text-muted-foreground font-retro mt-2">
+            Upload files from the assistant detail pages
+          </p>
         </div>
       ) : (
-        <div className="border rounded-lg bg-card">
+        <div className="border-2 border-primary/20 rounded-xl bg-card shadow-xl overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>

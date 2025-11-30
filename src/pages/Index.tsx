@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { VoiceProvider, useVoice } from "@/contexts/VoiceContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdmin } from "@/hooks/useAdmin";
+import { AdminQuickAccess } from "@/components/AdminQuickAccess";
 import { CRTOverlay } from "@/components/CRTOverlay";
 import { OrientationLock } from "@/components/OrientationLock";
 import { PixelFace } from "@/components/PixelFace";
@@ -295,6 +296,9 @@ const VoiceAgentContent = () => {
 
       {/* Debug Terminal - Hidden in focus mode */}
       {!focusMode && <DebugTerminal />}
+
+      {/* Admin Quick Access - Hidden in focus mode */}
+      {!focusMode && <AdminQuickAccess />}
 
       {/* Map Overlay */}
       {showMap && (

@@ -120,6 +120,10 @@ export default {
             opacity: "0",
           },
         },
+        "spin-slow": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
         "slide-in-right": {
           "0%": {
             transform: "translateX(100%)",
@@ -164,6 +168,7 @@ export default {
         "slide-out-right": "slide-out-right 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "slide-in-left": "slide-in-left 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
         "slide-out-left": "slide-out-left 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+        "spin-slow": "spin-slow 8s linear infinite",
         "enter": "fade-in 0.4s cubic-bezier(0.4, 0, 0.2, 1), scale-in 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
         "exit": "fade-out 0.4s cubic-bezier(0.4, 0, 0.2, 1), scale-out 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
       },
