@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-import { EmotionState } from '@/contexts/VoiceContext';
-import { useEffect, useState } from 'react';
+import { motion } from "framer-motion";
+import { EmotionState } from "@/contexts/VoiceContext";
+import { useEffect, useState } from "react";
 
 interface PixelFaceProps {
   emotion: EmotionState;
@@ -9,16 +9,22 @@ interface PixelFaceProps {
 export const PixelFace = ({ emotion }: PixelFaceProps) => {
   const [blink, setBlink] = useState(false);
 
-  // Blink animation for NEUTRAL state only
+  // Blink animation for NEUTRAL, SAD, and TALKING states
   useEffect(() => {
-    if (emotion !== 'NEUTRAL') {
-      setBlink(false); // Reset blink when changing states
+    const shouldBlink =
+      emotion === "NEUTRAL" || emotion === "SAD" || emotion === "TALKING";
+
+    if (!shouldBlink) {
+      setBlink(false);
       return;
     }
+
+    // More frequent blinking: every 2 seconds
     const interval = setInterval(() => {
       setBlink(true);
-      setTimeout(() => setBlink(false), 150);
-    }, 4000);
+      setTimeout(() => setBlink(false), 200);
+    }, 2000);
+
     return () => clearInterval(interval);
   }, [emotion]);
 
@@ -26,14 +32,12 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   const springTransition = {
     type: "spring" as const,
     stiffness: 150,
-    damping: 18
+    damping: 18,
   };
   // Left eye path variants with morphing - scaled up for prominence
   const leftEyeVariants = {
     NEUTRAL: {
-      d: blink 
-        ? "M 60,100 L 140,100 L 140,105 L 60,105 Z"
-        : "M 60,70 Q 60,50 80,50 L 120,50 Q 140,50 140,70 L 140,130 Q 140,150 120,150 L 80,150 Q 60,150 60,130 Z",
+      d: "M 60,70 Q 60,50 80,50 L 120,50 Q 140,50 140,70 L 140,130 Q 140,150 120,150 L 80,150 Q 60,150 60,130 Z",
       scale: 1,
     },
     HAPPY: {
@@ -61,9 +65,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   // Right eye with asymmetric behavior for personality - scaled up
   const rightEyeVariants = {
     NEUTRAL: {
-      d: blink 
-        ? "M 160,100 L 240,100 L 240,105 L 160,105 Z"
-        : "M 160,70 Q 160,50 180,50 L 220,50 Q 240,50 240,70 L 240,130 Q 240,150 220,150 L 180,150 Q 160,150 160,130 Z",
+      d: "M 160,70 Q 160,50 180,50 L 220,50 Q 240,50 240,70 L 240,130 Q 240,150 220,150 L 180,150 Q 160,150 160,130 Z",
       scale: 1,
     },
     HAPPY: {
@@ -93,20 +95,20 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   const leftEyebrowVariants = {
     LISTENING: {
       d: "M 50,30 L 130,25 L 130,32 L 50,37 Z",
-    }
+    },
   };
 
   const rightEyebrowVariants = {
     LISTENING: {
       d: "M 170,25 L 250,20 L 250,27 L 170,32 Z",
-    }
+    },
   };
 
   const renderEyes = () => {
     return (
       <>
         {/* Eyebrows for LISTENING state */}
-        {emotion === 'LISTENING' && (
+        {emotion === "LISTENING" && (
           <>
             <motion.path
               d={leftEyebrowVariants.LISTENING.d}
@@ -118,7 +120,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               transition={{
                 duration: 3,
                 repeat: Infinity,
-                ease: "easeInOut"
+                ease: "easeInOut",
               }}
             />
             <motion.path
@@ -132,24 +134,33 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
                 duration: 3,
                 repeat: Infinity,
                 ease: "easeInOut",
-                delay: 0.4
+                delay: 0.4,
               }}
             />
           </>
         )}
-        
+
         <motion.path
           variants={leftEyeVariants}
           animate={{
             ...leftEyeVariants[emotion],
             y: [-1, 1, -1],
-            x: [-0.5, 0.5, -0.5]
+            x: [-0.5, 0.5, -0.5],
+            scaleY:
+              (emotion === "NEUTRAL" ||
+                emotion === "SAD" ||
+                emotion === "TALKING") &&
+              blink
+                ? 0.1
+                : 1,
           }}
           transition={{
             ...springTransition,
             y: { duration: 3, repeat: Infinity, ease: "easeInOut" },
-            x: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }
+            x: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
+            scaleY: { duration: 0.15, ease: "easeInOut" },
           }}
+          transformOrigin="100 100"
           fill="hsl(var(--primary))"
           filter="url(#glow)"
         />
@@ -158,88 +169,107 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           animate={{
             ...rightEyeVariants[emotion],
             y: [-0.5, 1.5, -0.5],
-            x: [0.5, -0.5, 0.5]
+            x: [0.5, -0.5, 0.5],
+            scaleY:
+              (emotion === "NEUTRAL" ||
+                emotion === "SAD" ||
+                emotion === "TALKING") &&
+              blink
+                ? 0.1
+                : 1,
           }}
           transition={{
             ...springTransition,
-            y: { duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: 0.3 },
-            x: { duration: 3.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }
+            y: {
+              duration: 3.2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.3,
+            },
+            x: {
+              duration: 3.8,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: 0.8,
+            },
+            scaleY: { duration: 0.15, ease: "easeInOut" },
           }}
+          transformOrigin="200 100"
           fill="hsl(var(--primary))"
           filter="url(#glow)"
         />
-        
+
         {/* Thought bubble for LISTENING state - adjusted for larger eyes */}
-        {emotion === 'LISTENING' && (
+        {emotion === "LISTENING" && (
           <motion.g>
             {/* Small dot near eyebrow */}
-            <motion.circle 
-              cx="255" 
-              cy="45" 
-              r="4" 
-              fill="hsl(var(--primary))" 
+            <motion.circle
+              cx="255"
+              cy="45"
+              r="4"
+              fill="hsl(var(--primary))"
               filter="url(#glow)"
               animate={{
                 opacity: [0, 1, 1, 1, 1],
-                scale: [0, 1, 1, 1, 1]
+                scale: [0, 1, 1, 1, 1],
               }}
               transition={{
                 duration: 2.4,
                 repeat: Infinity,
                 times: [0, 0.15, 0.6, 0.8, 1],
-                ease: "easeOut"
+                ease: "easeOut",
               }}
             />
             {/* Three dots in a row (ellipsis/loading) - animate one by one */}
-            <motion.circle 
-              cx="268" 
-              cy="30" 
-              r="5" 
-              fill="hsl(var(--primary))" 
+            <motion.circle
+              cx="268"
+              cy="30"
+              r="5"
+              fill="hsl(var(--primary))"
               filter="url(#glow)"
               animate={{
                 opacity: [0, 0, 1, 1, 1],
-                scale: [0, 0, 1.2, 1, 1]
+                scale: [0, 0, 1.2, 1, 1],
               }}
               transition={{
                 duration: 2.4,
                 repeat: Infinity,
                 times: [0, 0.2, 0.35, 0.5, 1],
-                ease: "easeOut"
+                ease: "easeOut",
               }}
             />
-            <motion.circle 
-              cx="280" 
-              cy="30" 
-              r="5" 
-              fill="hsl(var(--primary))" 
+            <motion.circle
+              cx="280"
+              cy="30"
+              r="5"
+              fill="hsl(var(--primary))"
               filter="url(#glow)"
               animate={{
                 opacity: [0, 0, 0, 1, 1],
-                scale: [0, 0, 0, 1.2, 1]
+                scale: [0, 0, 0, 1.2, 1],
               }}
               transition={{
                 duration: 2.4,
                 repeat: Infinity,
                 times: [0, 0.35, 0.45, 0.6, 1],
-                ease: "easeOut"
+                ease: "easeOut",
               }}
             />
-            <motion.circle 
-              cx="292" 
-              cy="30" 
-              r="5" 
-              fill="hsl(var(--primary))" 
+            <motion.circle
+              cx="292"
+              cy="30"
+              r="5"
+              fill="hsl(var(--primary))"
               filter="url(#glow)"
               animate={{
                 opacity: [0, 0, 0, 0, 1],
-                scale: [0, 0, 0, 0, 1.2]
+                scale: [0, 0, 0, 0, 1.2],
               }}
               transition={{
                 duration: 2.4,
                 repeat: Infinity,
                 times: [0, 0.5, 0.6, 0.7, 0.85],
-                ease: "easeOut"
+                ease: "easeOut",
               }}
             />
           </motion.g>
@@ -251,18 +281,14 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   return (
     <motion.div
       className="flex items-center justify-center"
-      animate={emotion === 'LISTENING' ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+      animate={emotion === "LISTENING" ? { scale: [1, 1.05, 1] } : { scale: 1 }}
       transition={
-        emotion === 'LISTENING'
+        emotion === "LISTENING"
           ? { duration: 3.5, repeat: Infinity, ease: "easeInOut" }
           : springTransition
       }
     >
-      <svg
-        width="300"
-        height="300"
-        viewBox="0 0 300 300"
-      >
+      <svg width="300" height="300" viewBox="0 0 300 300">
         <defs>
           <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="coloredBlur" />
@@ -282,16 +308,16 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
 
         <motion.g
           animate={
-            emotion === 'LISTENING'
+            emotion === "LISTENING"
               ? { y: [-3, 3, -3] }
-              : emotion === 'HAPPY'
+              : emotion === "HAPPY"
               ? { y: [-2, 2, -2] }
               : {}
           }
           transition={{
-            duration: emotion === 'HAPPY' ? 2.5 : 2,
+            duration: emotion === "HAPPY" ? 2.5 : 2,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         >
           {renderEyes()}

@@ -119,7 +119,7 @@ export const useLiveKit = (
       }
     });
     audioElementsRef.current.clear();
-    
+
     if (roomRef.current) {
       roomRef.current.disconnect();
       roomRef.current = null;
@@ -156,7 +156,7 @@ export const useLiveKit = (
         }
       });
       audioElementsRef.current.clear();
-      
+
       if (roomRef.current) {
         roomRef.current.disconnect();
       }
@@ -231,7 +231,7 @@ function updateEmotionFromAgentState(
   // Only update emotion when state actually changes (to avoid flickering)
   // This ensures we pick a new random emotion when entering speaking state
   const stateChanged = agentState !== currentAgentState;
-  
+
   if (stateChanged) {
     const emotion = mapAgentStateToEmotion(agentState);
     console.log(`Agent state: ${agentState} -> Emotion: ${emotion}`);
@@ -358,7 +358,7 @@ function setupRoomListeners(
         console.log("Agent audio track subscribed:", track.sid);
 
         const trackId = track.sid || `${participant.identity}-audio`;
-        
+
         // Create and configure audio element
         const audioElement = track.attach() as HTMLAudioElement;
         audioElement.autoplay = true;
@@ -366,18 +366,19 @@ function setupRoomListeners(
         audioElement.setAttribute("playsinline", "true");
         audioElement.setAttribute("data-participant", participant.identity);
         audioElement.setAttribute("data-track-id", trackId);
-        
+
         // Add to DOM (hidden) to ensure playback works in all browsers
         audioElement.style.display = "none";
         document.body.appendChild(audioElement);
-        
+
         // Track the audio element for cleanup
         if (audioElementsRef) {
           audioElementsRef.current.set(trackId, audioElement);
         }
 
         // Play audio with error handling
-        audioElement.play()
+        audioElement
+          .play()
           .then(() => {
             console.log("Agent audio playback started:", trackId);
           })
@@ -396,9 +397,10 @@ function setupRoomListeners(
       participant: RemoteParticipant | undefined
     ) => {
       if (track.kind === "audio" && audioElementsRef) {
-        const trackId = track.sid || `${participant?.identity || "unknown"}-audio`;
+        const trackId =
+          track.sid || `${participant?.identity || "unknown"}-audio`;
         const audioElement = audioElementsRef.current.get(trackId);
-        
+
         if (audioElement) {
           audioElement.pause();
           audioElement.srcObject = null;
@@ -406,9 +408,12 @@ function setupRoomListeners(
             audioElement.parentNode.removeChild(audioElement);
           }
           audioElementsRef.current.delete(trackId);
-          console.log("Agent audio track unsubscribed and cleaned up:", trackId);
+          console.log(
+            "Agent audio track unsubscribed and cleaned up:",
+            trackId
+          );
         }
-        
+
         track.detach();
       }
     }
