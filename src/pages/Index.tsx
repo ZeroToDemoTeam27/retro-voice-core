@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { VoiceProvider, useVoice } from "@/contexts/VoiceContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { CRTOverlay } from "@/components/CRTOverlay";
@@ -6,6 +6,7 @@ import { OrientationLock } from "@/components/OrientationLock";
 import { PixelFace } from "@/components/PixelFace";
 import { DebugTerminal } from "@/components/DebugTerminal";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -16,8 +17,11 @@ import {
   Power,
   PowerOff,
   Maximize,
+  X,
+  MapPin,
+  CheckCircle,
 } from "lucide-react";
-import { useLiveKit } from "@/hooks/useLiveKit";
+import { useLiveKit, ToolCallEvent } from "@/hooks/useLiveKit";
 import { toast } from "sonner";
 
 const VoiceAgentContent = () => {
@@ -27,6 +31,33 @@ const VoiceAgentContent = () => {
   const [focusMode, setFocusMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+  // Tool call UI states
+  const [showMap, setShowMap] = useState(false);
+  const [showCheckIn, setShowCheckIn] = useState(false);
+  const [checkInName, setCheckInName] = useState("");
+  const [checkInEmail, setCheckInEmail] = useState("");
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
+
+  // Handle tool calls from the agent
+  const handleToolCall = useCallback((toolCall: ToolCallEvent) => {
+    console.log("Tool call received in component:", toolCall.tool);
+
+    switch (toolCall.tool) {
+      case "show_map":
+        setShowMap(true);
+        break;
+      case "check_in":
+        // Auto-fill name if provided by the agent
+        if (toolCall.name) {
+          setCheckInName(toolCall.name);
+        }
+        setShowCheckIn(true);
+        break;
+      default:
+        console.warn("Unknown tool call:", toolCall.tool);
+    }
+  }, []);
+
   const {
     isConnected,
     isConnecting,
@@ -35,7 +66,26 @@ const VoiceAgentContent = () => {
     disconnect,
     toggleMute,
     isMuted,
-  } = useLiveKit(updateEmotionFromLiveKit);
+  } = useLiveKit(updateEmotionFromLiveKit, handleToolCall);
+
+  // Handle check-in form submission
+  const handleCheckInSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!checkInName.trim() || !checkInEmail.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+
+    setIsCheckingIn(true);
+    // Simulate check-in process
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    toast.success(`Welcome to Zero2Demo, ${checkInName}! 🎉`);
+    setShowCheckIn(false);
+    setCheckInName("");
+    setCheckInEmail("");
+    setIsCheckingIn(false);
+  };
 
   // Sync LiveKit connection state with VoiceContext
   useEffect(() => {
@@ -231,6 +281,144 @@ const VoiceAgentContent = () => {
 
       {/* Debug Terminal - Hidden in focus mode */}
       {!focusMode && <DebugTerminal />}
+
+      {/* Map Overlay */}
+      {showMap && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in">
+          <div className="relative w-[90vw] max-w-4xl">
+            {/* Close button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowMap(false)}
+              className="absolute -top-12 right-0 font-retro z-10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+
+            {/* Map container */}
+            <div className="relative bg-background border-4 border-primary p-4 retro-glow">
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-retro text-primary">VENUE MAP</h2>
+              </div>
+
+              {/* Map image */}
+              <div className="relative aspect-[16/10] bg-muted overflow-hidden border-2 border-primary/50">
+                <img
+                  src="/hackathon-map.png"
+                  alt="Hackathon Venue Map"
+                  className="w-full h-full object-contain"
+                />
+
+                {/* Map legend */}
+                <div className="absolute bottom-4 left-4 bg-background/90 p-3 border border-primary text-sm font-retro">
+                  <div className="text-primary mb-2 font-bold">LEGEND</div>
+                  <div className="space-y-1 text-primary/80">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500"></div>
+                      <span>Hacking Area</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-yellow-500"></div>
+                      <span>Food & Drinks</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-blue-500"></div>
+                      <span>Stage / Demos</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-purple-500"></div>
+                      <span>Mentor Area</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 text-center text-sm font-retro text-primary/60">
+                Antler Offices & BLOXHUB • Frederiksholms Kanal 30
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Check-In Modal */}
+      {showCheckIn && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 animate-fade-in">
+          <div className="relative w-[90vw] max-w-md">
+            {/* Close button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setShowCheckIn(false)}
+              className="absolute -top-12 right-0 font-retro z-10"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+
+            {/* Check-in form container */}
+            <div className="bg-background border-4 border-primary p-6 retro-glow">
+              <div className="flex items-center gap-2 mb-6">
+                <CheckCircle className="h-6 w-6 text-primary" />
+                <h2 className="text-2xl font-retro text-primary">CHECK IN</h2>
+              </div>
+
+              <form onSubmit={handleCheckInSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-retro text-primary mb-2">
+                    YOUR NAME
+                  </label>
+                  <Input
+                    type="text"
+                    value={checkInName}
+                    onChange={(e) => setCheckInName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="font-retro"
+                    disabled={isCheckingIn}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-retro text-primary mb-2">
+                    EMAIL ADDRESS
+                  </label>
+                  <Input
+                    type="email"
+                    value={checkInEmail}
+                    onChange={(e) => setCheckInEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="font-retro"
+                    disabled={isCheckingIn}
+                  />
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full font-retro mt-6"
+                  disabled={isCheckingIn}
+                >
+                  {isCheckingIn ? (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2 animate-spin" />
+                      CHECKING IN...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      CONFIRM CHECK-IN
+                    </>
+                  )}
+                </Button>
+              </form>
+
+              <div className="mt-6 text-center text-xs font-retro text-primary/60">
+                Zero2Demo AI Hackathon • November 29-30, 2025
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -11,6 +11,15 @@ import {
 import { generateLiveKitToken } from "@/lib/livekit-token";
 import { EmotionState } from "@/contexts/VoiceContext";
 
+export type ToolCallType = "show_map" | "check_in";
+
+export interface ToolCallEvent {
+  type: "tool_call";
+  tool: ToolCallType;
+  timestamp: number;
+  name?: string; // For check_in tool, the pre-filled name
+}
+
 interface UseLiveKitReturn {
   room: Room | null;
   isConnected: boolean;
@@ -23,7 +32,8 @@ interface UseLiveKitReturn {
 }
 
 export const useLiveKit = (
-  onEmotionUpdate?: (emotion: EmotionState) => void
+  onEmotionUpdate?: (emotion: EmotionState) => void,
+  onToolCall?: (toolCall: ToolCallEvent) => void
 ): UseLiveKitReturn => {
   const [room, setRoom] = useState<Room | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -74,7 +84,7 @@ export const useLiveKit = (
         });
 
         // Set up event listeners before connecting
-        setupRoomListeners(newRoom, onEmotionUpdate, audioElementsRef);
+        setupRoomListeners(newRoom, onEmotionUpdate, onToolCall, audioElementsRef);
 
         // Connect to room
         await newRoom.connect(livekitUrl, token);
@@ -106,7 +116,7 @@ export const useLiveKit = (
         setIsConnecting(false);
       }
     },
-    [isConnecting, isConnected, onEmotionUpdate]
+    [isConnecting, isConnected, onEmotionUpdate, onToolCall]
   );
 
   const disconnect = useCallback(async () => {
@@ -244,6 +254,7 @@ function updateEmotionFromAgentState(
 function setupRoomListeners(
   room: Room,
   onEmotionUpdate?: (emotion: EmotionState) => void,
+  onToolCall?: (toolCall: ToolCallEvent) => void,
   audioElementsRef?: React.MutableRefObject<Map<string, HTMLAudioElement>>
 ) {
   // Track current agent state to detect transitions
@@ -281,7 +292,7 @@ function setupRoomListeners(
     console.log("Reconnected to LiveKit room");
   });
 
-  // Handle data messages for emotion updates
+  // Handle data messages for emotion updates and tool calls
   room.on(RoomEvent.DataReceived, (payload, participant) => {
     if (!participant || participant.isLocal) return;
 
@@ -292,9 +303,12 @@ function setupRoomListeners(
         const emotion = data.emotion as EmotionState;
         console.log("Emotion update received:", emotion);
         onEmotionUpdate?.(emotion);
+      } else if (data.type === "tool_call" && data.tool) {
+        console.log("Tool call received:", data.tool);
+        onToolCall?.(data as ToolCallEvent);
       }
     } catch (err) {
-      console.error("Failed to parse emotion update:", err);
+      console.error("Failed to parse data message:", err);
     }
   });
 

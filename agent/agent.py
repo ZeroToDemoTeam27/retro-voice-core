@@ -1,11 +1,65 @@
 from dotenv import load_dotenv
 from livekit import agents, rtc
 from livekit.agents import AgentSession, Agent, RoomInputOptions
+from livekit.agents.llm import function_tool
 from livekit.plugins import noise_cancellation, google
 import json
 import asyncio
+from typing import Annotated
 
 load_dotenv(".env.local")
+
+# Global room reference for tool callbacks
+_current_room: rtc.Room | None = None
+
+
+# Tool definitions for the hackathon assistant
+@function_tool(description="Show the hackathon venue map to help the user navigate. Use this when someone asks for directions, where something is located, or wants to see the map of the space.")
+async def show_map() -> str:
+    """Display the venue map overlay in the frontend"""
+    if _current_room:
+        try:
+            await _current_room.local_participant.publish_data(
+                json.dumps({
+                    "type": "tool_call",
+                    "tool": "show_map",
+                    "timestamp": asyncio.get_event_loop().time()
+                }).encode(),
+                topic="tool_calls"
+            )
+            print("Tool call sent: show_map")
+            return "Here is the map."
+        except Exception as e:
+            print(f"Error sending show_map tool call: {e}")
+            return "I couldn't display the map right now."
+    return "The map display is currently unavailable."
+
+
+@function_tool(description="Open the hackathon check-in interface with the participant's name pre-filled. You MUST ask for the person's name first before calling this tool. Once you have their name, call this tool to display the check-in form.")
+async def check_in(
+    name: Annotated[str, "The name of the person checking in. Ask for this before calling the tool."],
+) -> str:
+    """Display the check-in UI in the frontend with name pre-filled"""
+    if _current_room:
+        try:
+            await _current_room.local_participant.publish_data(
+                json.dumps({
+                    "type": "tool_call",
+                    "tool": "check_in",
+                    "name": name,
+                    "timestamp": asyncio.get_event_loop().time()
+                }).encode(),
+                topic="tool_calls"
+            )
+            print(f"Tool call sent: check_in for {name}")
+            return "Press check in when you're ready."
+        except Exception as e:
+            print(f"Error sending check_in tool call: {e}")
+            return "I couldn't open the check-in form right now."
+    return "The check-in system is currently unavailable."
+
+
+
 
 class Assistant(Agent):
     def __init__(self) -> None:
@@ -69,6 +123,16 @@ You are interacting with users via voice. Keep your responses natural and conver
 - Catch attention of passersby and invite them to learn more about the event
 - Create memorable interactions that reflect the innovative, AI-first spirit of Zero2Demo
 
+# Available Tools
+
+You have access to tools that display information on the screen:
+
+1. **show_map** - Use this when someone asks for directions, wants to find something, or asks to see the venue map. This displays the hackathon venue map.
+
+2. **check_in(name)** - Use this when someone wants to check in or register their attendance. IMPORTANT: You must ask for their name first before calling this tool. Once you have their name, call check_in with their name to open the form with their name pre-filled.
+
+Use these tools proactively when relevant - don't just describe things if you can show them!
+
 # Guardrails
 
 - Stay positive, supportive, and within the scope of hackathon hospitality
@@ -81,6 +145,7 @@ You are interacting with users via voice. Keep your responses natural and conver
 
 async def entrypoint(ctx: agents.JobContext):
     """Main entrypoint for the voice agent"""
+    global _current_room
     
     # Track current emotion state
     current_emotion = "NEUTRAL"
@@ -112,6 +177,9 @@ async def entrypoint(ctx: agents.JobContext):
     await ctx.wait_for_participant()
     print("User connected!")
     
+    # Set global room reference for tool callbacks
+    _current_room = ctx.room
+    
     # Set up event handlers for emotion updates
     @ctx.room.on("active_speakers_changed")
     def on_active_speakers_changed(speakers: list[rtc.Participant]):
@@ -133,7 +201,8 @@ async def entrypoint(ctx: agents.JobContext):
             model="gemini-2.0-flash-exp",
             voice="Puck",
             temperature=0.8,
-        )
+        ),
+        tools=[show_map, check_in],
     )
     
     # Send initial emotion
