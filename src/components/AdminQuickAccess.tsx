@@ -16,7 +16,7 @@ export const AdminQuickAccess = () => {
   ];
 
   return (
-    <div className="fixed bottom-20 right-4 z-30">
+    <div className="fixed bottom-4 left-4 z-30">
       {/* Quick Links Menu */}
       {isOpen && (
         <div className="mb-4 space-y-2 animate-fade-in">
