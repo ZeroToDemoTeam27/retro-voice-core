@@ -41,7 +41,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1.05,
     },
     SAD: {
-      d: "M 90,70 L 90,70 Q 70,75 65,95 L 65,140 Q 65,165 90,170 L 110,170 Q 135,165 135,140 L 135,95 Q 130,75 110,70 Z",
+      d: "M 60,90 Q 60,70 80,70 L 120,70 Q 140,70 140,90 L 140,160 Q 140,180 120,180 L 80,180 Q 60,180 60,160 Z",
       scale: 1,
     },
     CONFUSED: {
@@ -71,7 +71,7 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scale: 1.05,
     },
     SAD: {
-      d: "M 190,70 L 190,70 Q 170,75 165,95 L 165,140 Q 165,165 190,170 L 210,170 Q 235,165 235,140 L 235,95 Q 230,75 210,70 Z",
+      d: "M 160,90 Q 160,70 180,70 L 220,70 Q 240,70 240,90 L 240,160 Q 240,180 220,180 L 180,180 Q 160,180 160,160 Z",
       scale: 1,
     },
     CONFUSED: {
@@ -152,7 +152,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           }}
           fill="hsl(var(--primary))"
           filter="url(#glow)"
-          mask={emotion === 'SAD' ? "url(#scanlineMask)" : undefined}
         />
         <motion.path
           variants={rightEyeVariants}
@@ -168,7 +167,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
           }}
           fill="hsl(var(--primary))"
           filter="url(#glow)"
-          mask={emotion === 'SAD' ? "url(#scanlineMask)" : undefined}
         />
         
         {/* Thought bubble for LISTENING state - adjusted for larger eyes */}
@@ -280,16 +278,6 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          
-          {/* Scanline pattern for retro TV effect */}
-          <pattern id="scanlines" x="0" y="0" width="100%" height="4" patternUnits="userSpaceOnUse">
-            <rect x="0" y="0" width="100%" height="2" fill="hsl(var(--primary))" />
-            <rect x="0" y="2" width="100%" height="2" fill="hsl(var(--background))" opacity="0.3" />
-          </pattern>
-          
-          <mask id="scanlineMask">
-            <rect x="0" y="0" width="300" height="300" fill="url(#scanlines)" />
-          </mask>
         </defs>
 
         <motion.g
