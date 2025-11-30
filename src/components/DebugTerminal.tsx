@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { EmotionState, useVoice } from "@/contexts/VoiceContext";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const DebugTerminal = () => {
   const { emotion, setEmotion } = useVoice();
   const [isRunningDemo, setIsRunningDemo] = useState(false);
+  const loopRef = useRef<boolean>(false);
 
   const emotions: EmotionState[] = [
     "NEUTRAL",
@@ -16,23 +17,45 @@ export const DebugTerminal = () => {
     "TALKING",
   ];
 
-  const runDemoLoop = async () => {
-    if (isRunningDemo) return;
-    setIsRunningDemo(true);
+  const sequence: Array<{ state: EmotionState; duration: number }> = [
+    { state: "TALKING", duration: 3000 },
+    { state: "LISTENING", duration: 2000 },
+    { state: "HAPPY", duration: 3000 },
+    { state: "NEUTRAL", duration: 1000 },
+  ];
 
-    const sequence: Array<{ state: EmotionState; duration: number }> = [
-      { state: "TALKING", duration: 3000 },
-      { state: "LISTENING", duration: 2000 },
-      { state: "HAPPY", duration: 3000 },
-      { state: "NEUTRAL", duration: 1000 },
-    ];
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
 
-    for (const step of sequence) {
-      setEmotion(step.state);
-      await new Promise((resolve) => setTimeout(resolve, step.duration));
+    const runLoop = async () => {
+      if (!loopRef.current) return;
+
+      for (const step of sequence) {
+        if (!loopRef.current) break;
+        setEmotion(step.state);
+        await new Promise((resolve) => {
+          timeoutId = setTimeout(resolve, step.duration);
+        });
+      }
+
+      if (loopRef.current) {
+        runLoop();
+      }
+    };
+
+    if (isRunningDemo) {
+      loopRef.current = true;
+      runLoop();
     }
 
-    setIsRunningDemo(false);
+    return () => {
+      loopRef.current = false;
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [isRunningDemo]);
+
+  const toggleDemoLoop = () => {
+    setIsRunningDemo(!isRunningDemo);
   };
 
   return (
@@ -59,12 +82,11 @@ export const DebugTerminal = () => {
       </div>
 
       <Button
-        onClick={runDemoLoop}
-        disabled={isRunningDemo}
+        onClick={toggleDemoLoop}
         className="w-full font-retro"
         variant="default"
       >
-        {isRunningDemo ? "RUNNING..." : "DEMO LOOP"}
+        {isRunningDemo ? "STOP LOOP" : "START LOOP"}
       </Button>
     </div>
   );
