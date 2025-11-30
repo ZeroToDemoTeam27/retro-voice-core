@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { VoiceProvider, useVoice } from "@/contexts/VoiceContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdmin } from "@/hooks/useAdmin";
 import { CRTOverlay } from "@/components/CRTOverlay";
 import { OrientationLock } from "@/components/OrientationLock";
 import { PixelFace } from "@/components/PixelFace";
@@ -20,6 +21,7 @@ import {
   X,
   MapPin,
   CheckCircle,
+  Settings,
 } from "lucide-react";
 import { useLiveKit, ToolCallEvent } from "@/hooks/useLiveKit";
 import { toast } from "sonner";
@@ -27,6 +29,7 @@ import { toast } from "sonner";
 const VoiceAgentContent = () => {
   const { emotion, updateEmotionFromLiveKit, setIsConnected } = useVoice();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const navigate = useNavigate();
   const [focusMode, setFocusMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -146,6 +149,17 @@ const VoiceAgentContent = () => {
       {/* Top Navigation - Hidden in focus mode */}
       {!focusMode && (
         <div className="absolute top-4 right-4 z-20 flex gap-2 animate-fade-in">
+          {isAdmin && (
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate("/admin")}
+              className="font-retro"
+              title="Admin Dashboard"
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          )}
           <Button
             variant="outline"
             size="icon"
