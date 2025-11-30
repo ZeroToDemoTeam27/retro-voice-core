@@ -1,4 +1,30 @@
+# IMPORTANT: Load environment variables BEFORE importing livekit modules
+# The LiveKit CLI checks for environment variables during initialization
 from dotenv import load_dotenv
+from pathlib import Path
+import os
+
+# Load environment variables from .env.local or .env file
+# Use the directory where this script is located
+script_dir = Path(__file__).parent
+env_local = script_dir / ".env.local"
+env_file = script_dir / ".env"
+
+# Try .env.local first, then fall back to .env
+if env_local.exists():
+    load_dotenv(env_local, override=True)
+    print(f"Loaded environment from: {env_local}")
+elif env_file.exists():
+    load_dotenv(env_file, override=True)
+    print(f"Loaded environment from: {env_file}")
+else:
+    # Try loading from current directory as fallback
+    load_dotenv(".env.local", override=True)
+    load_dotenv(".env", override=True)
+    if not os.getenv("LIVEKIT_URL"):
+        print("WARNING: No .env.local or .env file found. Please create one with LIVEKIT_URL, LIVEKIT_API_KEY, LIVEKIT_API_SECRET, and OPENAI_API_KEY")
+
+# Now import livekit modules after environment is loaded
 from livekit import agents, rtc
 from livekit.agents import AgentSession, Agent, RoomInputOptions
 from livekit.agents.llm import function_tool
@@ -6,8 +32,6 @@ from livekit.plugins import noise_cancellation, openai
 import json
 import asyncio
 from typing import Annotated
-
-load_dotenv(".env.local")
 
 # Global room reference for tool callbacks
 _current_room: rtc.Room | None = None
@@ -255,4 +279,3 @@ if __name__ == "__main__":
     agents.cli.run_app(
         agents.WorkerOptions(entrypoint_fnc=entrypoint)
     )
-

@@ -86,7 +86,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       "M 55,75 Q 55,55 75,55 L 115,55 Q 135,55 135,75 L 135,125 Q 135,145 115,145 L 75,145 Q 55,145 55,125 Z",
     THINKING:
       "M 55,75 Q 55,55 75,55 L 115,55 Q 135,55 135,75 L 135,125 Q 135,145 115,145 L 75,145 Q 55,145 55,125 Z",
-    LISTENING: "M 60,70 L 120,70 L 120,150 L 60,150 Z",
+    LISTENING:
+      "M 60,70 Q 60,50 80,50 L 120,50 Q 140,50 140,70 L 140,130 Q 140,150 120,150 L 80,150 Q 60,150 60,130 Z", // Same as NEUTRAL for smooth transition
     TALKING:
       "M 60,75 Q 60,55 80,55 L 120,55 Q 140,55 140,75 L 140,125 Q 140,145 120,145 L 80,145 Q 60,145 60,125 Z",
   };
@@ -100,7 +101,8 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       "M 165,65 Q 165,45 190,45 L 235,45 Q 260,45 260,65 L 260,135 Q 260,155 235,155 L 190,155 Q 165,155 165,135 Z",
     THINKING:
       "M 165,65 Q 165,45 190,45 L 235,45 Q 260,45 260,65 L 260,135 Q 260,155 235,155 L 190,155 Q 165,155 165,135 Z",
-    LISTENING: "M 170,70 L 240,70 L 240,150 L 170,150 Z",
+    LISTENING:
+      "M 160,70 Q 160,50 180,50 L 220,50 Q 240,50 240,70 L 240,130 Q 240,150 220,150 L 180,150 Q 160,150 160,130 Z", // Same as NEUTRAL for smooth transition
     TALKING:
       "M 160,75 Q 160,55 180,55 L 220,55 Q 240,55 240,75 L 240,125 Q 240,145 220,145 L 180,145 Q 160,145 160,125 Z",
   };
@@ -110,8 +112,16 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
 
   // --- 4. Transition Logic ---
   // This is key: Blinks must be fast (easeOut), Shape changes must be springy.
+  // LISTENING uses same shape as NEUTRAL, so transitions are instant and smooth
   const getTransition = (prop: string) => {
     if (prop === "d") {
+      // Instant transition for LISTENING since it uses same shape as NEUTRAL
+      if (emotion === "LISTENING" || previousEmotion === "LISTENING") {
+        return {
+          duration: 0.3,
+          ease: "easeInOut" as const,
+        };
+      }
       return {
         type: "spring" as const,
         stiffness: 120,
@@ -124,8 +134,26 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
         ? { duration: 0.1, ease: "easeOut" as const } // Fast blink shut
         : { type: "spring" as const, stiffness: 300, damping: 25 }; // Snap open
     }
+    if (prop === "y") {
+      // Smooth float transition for LISTENING
+      if (emotion === "LISTENING") {
+        return {
+          type: "spring" as const,
+          stiffness: 100,
+          damping: 20,
+          mass: 1.3,
+        };
+      }
+    }
     return { type: "spring" as const, stiffness: 150, damping: 18 };
   };
+
+  // Track previous emotion to detect transitions
+  const [previousEmotion, setPreviousEmotion] = useState<EmotionState>(emotion);
+
+  useEffect(() => {
+    setPreviousEmotion(emotion);
+  }, [emotion]);
 
   // --- 5. State Calculation ---
   // Calculate target visual state based on priority: Blink > Talk > Emotion
@@ -160,9 +188,9 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
       scaleX = 1.15; // Asymmetric confused/thinking eye
     }
 
-    // LISTENING BOUNCE
+    // LISTENING: Subtle float animation (same eye shape as NEUTRAL, just animated)
     if (emotion === "LISTENING") {
-      translateY = -3; // Slight float
+      translateY = -2; // Subtle float
     }
 
     return {
@@ -176,9 +204,23 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
   return (
     <motion.div
       className="flex items-center justify-center"
-      // Container breathing animation for listening
-      animate={emotion === "LISTENING" ? { scale: [1, 1.05, 1] } : { scale: 1 }}
-      transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+      // Container breathing animation for listening - smooth fade-in
+      animate={
+        emotion === "LISTENING"
+          ? { scale: [1, 1.03, 1], opacity: [0.95, 1, 0.95] }
+          : { scale: 1, opacity: 1 }
+      }
+      transition={{
+        scale: {
+          duration: emotion === "LISTENING" ? 3.5 : 0.4,
+          repeat: emotion === "LISTENING" ? Infinity : 0,
+          ease: "easeInOut",
+        },
+        opacity: {
+          duration: emotion === "LISTENING" ? 0.5 : 0.3,
+          ease: "easeInOut",
+        },
+      }}
     >
       <svg width="300" height="300" viewBox="0 0 300 300">
         <defs>
@@ -298,9 +340,18 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
             </motion.g>
           )}
 
-          {/* THINKING BUBBLE (LISTENING STATE) */}
-          <motion.g animate={{ opacity: emotion === "LISTENING" ? 1 : 0 }}>
-            {/* Use your original circles here, cleaned up */}
+          {/* LISTENING DOTS (LISTENING STATE) - Smooth fade-in */}
+          <motion.g
+            animate={{ opacity: emotion === "LISTENING" ? 1 : 0 }}
+            transition={{
+              opacity: {
+                duration: emotion === "LISTENING" ? 0.5 : 0.3,
+                ease: "easeInOut",
+                delay: emotion === "LISTENING" ? 0.1 : 0,
+              },
+            }}
+          >
+            {/* Animated dots to indicate listening */}
             {[0, 1, 2].map((i) => (
               <motion.circle
                 key={i}
@@ -309,19 +360,28 @@ export const PixelFace = ({ emotion }: PixelFaceProps) => {
                 r="5"
                 fill="hsl(var(--primary))"
                 filter="url(#glow)"
+                initial={{ opacity: 0, scale: 0.5 }}
                 animate={
                   emotion === "LISTENING"
                     ? {
-                        opacity: [0.3, 1, 0.3],
-                        scale: [0.8, 1.2, 0.8],
+                        opacity: [0.4, 1, 0.4],
+                        scale: [0.9, 1.2, 0.9],
                       }
-                    : { opacity: 0 }
+                    : { opacity: 0, scale: 0.5 }
                 }
                 transition={{
-                  duration: 1.5,
-                  repeat: Infinity,
-                  delay: i * 0.3,
-                  ease: "easeInOut",
+                  opacity: {
+                    duration: emotion === "LISTENING" ? 1.2 : 0.3,
+                    repeat: emotion === "LISTENING" ? Infinity : 0,
+                    delay: emotion === "LISTENING" ? i * 0.25 : 0,
+                    ease: "easeInOut",
+                  },
+                  scale: {
+                    duration: emotion === "LISTENING" ? 1.2 : 0.3,
+                    repeat: emotion === "LISTENING" ? Infinity : 0,
+                    delay: emotion === "LISTENING" ? i * 0.25 : 0,
+                    ease: "easeInOut",
+                  },
                 }}
               />
             ))}
